@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ariel Greenblatt</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Geist:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:        #0E0E0E;
+      --surface:   #161616;
+      --surface2:  #1A1A1A;
+      --border:    #272727;
+      --ink:       #F0EDE8;
+      --ink-mid:   #888480;
+      --ink-dim:   #444240;
+      --green:     #3D7A5A;
+      --green-dot: #4CAF7A;
+      --red-dot:   #C05A5A;
+      --amber-dot: #C8A84B;
+      --serif:     'Cormorant Garamond', Georgia, serif;
+      --sans:      'Geist', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-weight: 300;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .wrap     { max-width: 1100px; margin: 0 auto; padding: 0 48px; }
+    .wrap-mid { max-width: 800px;  margin: 0 auto; padding: 0 48px; }
+
+    /* ── NAV ── */
+    nav {
+      padding: 32px 0 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-name {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink);
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .nav-name:hover { color: var(--ink-mid); }
+    .nav-right { display: flex; gap: 32px; align-items: center; }
+    .nav-right button, .nav-right a {
+      font-size: 0.75rem;
+      font-weight: 300;
+      letter-spacing: 0.06em;
+      color: var(--ink-mid);
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      font-family: var(--sans);
+      transition: color 0.2s;
+    }
+    .nav-right button:hover, .nav-right a:hover { color: var(--ink); }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 72px 0 80px;
+      border-bottom: 1px solid var(--border);
+      animation: fadeIn 0.8s ease both;
+    }
+    .hero h1 {
+      font-family: var(--serif);
+      font-size: clamp(3.2rem, 7vw, 6.4rem);
+      font-weight: 300;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      max-width: 820px;
+      margin-bottom: 40px;
+    }
+    .hero h1 em { font-style: italic; }
+    .hero-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .hero-bio {
+      font-size: 0.9rem;
+      color: var(--ink-mid);
+      line-height: 1.75;
+      max-width: 400px;
+    }
+    .hero-meta {
+      text-align: right;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      line-height: 2.2;
+    }
+    .hero-meta a {
+      color: var(--ink-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .hero-meta a:hover { color: var(--ink); }
+
+    /* ── WORKS ── */
+    .works-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 40px 0 0;
+    }
+    .works-title {
+      font-family: var(--serif);
+      font-size: 1.1rem;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--ink-mid);
+    }
+    .works-range {
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      color: var(--ink-dim);
+    }
+
+    .project-list { padding: 8px 0 0; }
+
+    .project-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      margin-bottom: 2px;
+    }
+
+    /* ── PROJECT CARD WRAPPER ── */
+    .project-card-wrap { display: flex; flex-direction: column; }
+
+    /* The visible card face */
+    .project-card {
+      background: var(--surface);
+      position: relative;
+      overflow: hidden;
+      min-height: 260px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 28px 32px 0;
+      transition: background 0.25s ease;
+    }
+    .project-card.locked-card { cursor: default; }
+
+    /* Hover only on non-locked */
+    .project-card-wrap:not(.is-locked):hover .project-card { background: #1C1C1C; }
+
+    /* Badge */
+    .badge {
+      position: absolute;
+      top: 20px; left: 24px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 2px;
+    }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .badge.shipped      { background: rgba(61,122,90,0.15);  color: #4CAF7A; }
+    .badge.shipped .badge-dot { background: var(--green-dot); }
+    .badge.locked-badge { background: rgba(138,58,58,0.15);  color: #C05A5A; }
+    .badge.locked-badge .badge-dot { background: var(--red-dot); }
+    .badge.building     { background: rgba(180,140,60,0.12); color: #C8A84B; }
+    .badge.building .badge-dot { background: var(--amber-dot); }
+
+    /* Ghost watermark */
+    .card-visual {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.04;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .card-visual-text {
+      font-family: var(--serif);
+      font-size: 11rem;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--ink);
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .lock-overlay {
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        -45deg,
+        transparent, transparent 6px,
+        rgba(255,255,255,0.012) 6px, rgba(255,255,255,0.012) 7px
+      );
+      pointer-events: none;
+    }
+
+    .card-body { position: relative; z-index: 2; padding-bottom: 20px; }
+    .card-title {
+      font-family: var(--serif);
+      font-size: 1.55rem;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+    .card-sub {
+      font-size: 0.8rem;
+      color: var(--ink-mid);
+      line-height: 1.5;
+    }
+
+    /* ── CARD ACTION BAR ── */
+    .card-actions {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      gap: 0;
+      border-top: 1px solid var(--border);
+      margin: 0 -32px; /* bleed to card edges */
+    }
+    .card-btn {
+      flex: 1;
+      padding: 12px 16px;
+      font-size: 0.68rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: var(--sans);
+      text-align: center;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .card-btn:hover { color: var(--ink); background: rgba(255,255,255,0.03); }
+    .card-btn + .card-btn { border-left: 1px solid var(--border); }
+    .card-btn.active { color: var(--ink); }
+    .card-btn.disabled { cursor: default; opacity: 0.35; pointer-events: none; }
+
+    /* ── ACCORDION PANEL ── */
+    .cs-accordion {
+      background: var(--surface2);
+      border-top: none;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1);
+    }
+    .cs-accordion.open { max-height: 2400px; }
+
+    .cs-accordion-inner {
+      padding: 40px 40px 48px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Sections inside accordion */
+    .cs-section { margin-bottom: 40px; }
+    .cs-section:last-child { margin-bottom: 0; }
+
+    .cs-sec-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .cs-sec-label::after { content: ''; flex: 0 0 28px; height: 1px; background: var(--border); }
+
+    .cs-prose {
+      font-size: 0.88rem;
+      color: var(--ink-mid);
+      line-height: 1.9;
+    }
+    .cs-prose p { margin-bottom: 14px; }
+    .cs-prose p:last-child { margin-bottom: 0; }
+
+    /* Hint / placeholder text */
+    .cs-hint {
+      font-size: 0.84rem;
+      color: var(--ink-dim);
+      line-height: 1.8;
+      font-style: italic;
+      border-left: 1px solid var(--border);
+      padding-left: 16px;
+    }
+    .cs-hint p { margin-bottom: 10px; }
+    .cs-hint p:last-child { margin-bottom: 0; }
+
+    .cs-rule { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+    .cs-callout {
+      background: rgba(255,255,255,0.03);
+      border-left: 2px solid var(--ink-dim);
+      padding: 16px 20px;
+      margin-top: 8px;
+    }
+    .cs-callout-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      margin-bottom: 7px;
+    }
+    .cs-callout p { font-size: 0.88rem; color: var(--ink); line-height: 1.75; }
+
+    .cs-pullquote {
+      padding: 24px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      margin: 16px 0;
+    }
+    .cs-pullquote p {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 1.2rem;
+      line-height: 1.5;
+      color: var(--ink);
+      font-weight: 300;
+    }
+
+    /* ── NOT SHAREABLE PAGE ── */
+    .ns-page { animation: fadeIn 0.5s ease both; }
+    .ns-body {
+      padding: 80px 0 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+    }
+    .ns-icon {
+      width: 44px; height: 44px;
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--ink-dim);
+      font-size: 1.1rem;
+    }
+    .ns-title {
+      font-family: var(--serif);
+      font-size: 2.4rem;
+      font-weight: 300;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+    .ns-desc { font-size: 0.88rem; color: var(--ink-mid); line-height: 1.8; max-width: 480px; }
+    .ns-email { font-size: 0.78rem; color: var(--ink-mid); letter-spacing: 0.06em; text-decoration: none; transition: color 0.2s; }
+    .ns-email:hover { color: var(--ink); }
+    .ns-back {
+      margin-top: 12px;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: var(--sans);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: color 0.2s, gap 0.2s;
+    }
+    .ns-back:hover { color: var(--ink); gap: 14px; }
+
+    /* ── ABOUT ── */
+    .about-section {
+      border-top: 1px solid var(--border);
+      padding: 64px 0 80px;
+    }
+    .about-inner {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 80px;
+      align-items: start;
+    }
+    .about-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      margin-bottom: 20px;
+    }
+    .about-text {
+      font-family: var(--serif);
+      font-size: 1.25rem;
+      font-weight: 300;
+      line-height: 1.7;
+      color: var(--ink);
+    }
+    .about-text em { font-style: italic; }
+    .about-row {
+      display: flex;
+      gap: 20px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .about-row:first-child { border-top: 1px solid var(--border); }
+    .about-row-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      min-width: 80px;
+      padding-top: 1px;
+    }
+    .about-row-val { font-size: 0.82rem; color: var(--ink-mid); line-height: 1.6; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 0 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    footer span { font-size: 0.7rem; color: var(--ink-dim); letter-spacing: 0.05em; }
+    .foot-links { display: flex; gap: 24px; }
+    .foot-links a {
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .foot-links a:hover { color: var(--ink); }
+
+    /* Pages */
+    .page { display: none; }
+    .page.active { display: block; animation: fadeIn 0.4s ease both; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 700px) {
+      .wrap, .wrap-mid { padding: 0 20px; }
+      .hero h1 { font-size: 2.8rem; }
+      .hero-foot { flex-direction: column; gap: 20px; }
+      .hero-meta { text-align: left; }
+      .project-row { grid-template-columns: 1fr; }
+      .about-inner { grid-template-columns: 1fr; gap: 40px; }
+      .cs-accordion-inner { padding: 28px 24px 36px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════ HOME ═══════════════ -->
+<div class="page active" id="page-home">
+<div class="wrap">
+
+  <nav>
+    <button class="nav-name" onclick="showPage('page-home')">Ariel Greenblatt</button>
+    <div class="nav-right">
+      <button onclick="goToAbout()">About</button>
+      <a href="mailto:akg2196@columbia.edu">Contact</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1>I build products to solve problems wherever I find them.</h1>
+    <div class="hero-foot">
+      <p class="hero-bio">
+        I'm a Columbia University Dual Degree student pursuing a BA in CS and a BA in History. I blend developer instincts and ability, with care for context and powerful communication. Previously TikTok.
+      </p>
+      <div class="hero-meta">
+        <div>New York, NY</div>
+        <div><a href="https://www.linkedin.com/in/ariel-g-945081217/" target="_blank">LINKEDIN ↗</a></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="works-header">
+    <span class="works-title">Selected works</span>
+    <span class="works-range">'23–'26</span>
+  </div>
+
+  <div class="project-list">
+
+    <!-- Row 1 -->
+    <div class="project-row">
+
+      <!-- Course Vault -->
+      <div class="project-card-wrap">
+        <div class="project-card">
+          <div class="badge shipped"><span class="badge-dot"></span> Shipped</div>
+          <div class="card-visual"><span class="card-visual-text">CV</span></div>
+          <div class="card-body">
+            <div class="card-title">Course Vault <em>(formerly Memory)</em></div>
+            <div class="card-sub">Personalized AI learning from your own course material</div>
+          </div>
+          <div class="card-actions">
+            <a class="card-btn" href="https://course-vault-tau.vercel.app" target="_blank">View Project ↗</a>
+            <button class="card-btn" onclick="showPage('page-coursevault')">Case Study →</button>
+          </div>
+        </div>
+        <div class="cs-accordion" id="cs-coursevault">
+          <div class="cs-accordion-inner">
+
+            <div class="cs-section">
+              <div class="cs-sec-label">The Setup</div>
+              <div class="cs-hint">
+                <p>What is Course Vault — what does it actually do, and where did the idea come from? What's the context (personal frustration, observed pattern, gap in the market)?</p>
+                <p>Orient the reader in 2–3 sentences. Don't bury the lede.</p>
+              </div>
+            </div>
+
+            <hr class="cs-rule"/>
+
+            <div class="cs-section">
+              <div class="cs-sec-label">The Problem</div>
+              <div class="cs-hint">
+                <p>What's broken about how students currently engage with course material? What did your 10 user interviews surface? Did the real problem turn out to be different from what you assumed going in?</p>
+              </div>
+            </div>
+
+            <hr class="cs-rule"/>
+
+            <div class="cs-section">
+              <div class="cs-sec-label">My Process</div>
+              <div class="cs-hint">
+                <p>Walk through what you actually did — user research, prototype iterations, the AI workflow design, Firebase integrations. What did you test, what failed, what surprised you?</p>
+              </div>
+            </div>
+
+            <hr class="cs-rule"/>
+
+            <div class="cs-section">
+              <div class="cs-sec-label">The Key Decision</div>
+              <div class="cs-hint">
+                <p>What was the hardest product call you made? What did you choose NOT to build in v1, and why? What tradeoff defined the direction of the product?</p>
+              </div>
+              <div class="cs-pullquote" style="margin-top:24px;">
+                <p>"[Your most important insight from building this — one sentence that captures what you learned about the problem.]"</p>
+              </div>
+            </div>
+
+            <hr class="cs-rule"/>
+
+            <div class="cs-section">
+              <div class="cs-sec-label">The Outcome</div>
+              <div class="cs-callout">
+                <div class="cs-callout-label">Where it stands</div>
+                <p>[What's shipped so far? What feedback have you gotten from prototype tests? What's next on the roadmap?]</p>
+              </div>
+            </div>
+
+            <hr class="cs-rule"/>
+
+            <div class="cs-section">
+              <div class="cs-sec-label">What I'd Do Differently</div>
+              <div class="cs-hint">
+                <p>One honest paragraph. What would you change about your process, your assumptions, or your early decisions?</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Salt & Prepper -->
+      <div class="project-card-wrap">
+        <div class="project-card">
+          <div class="badge shipped"><span class="badge-dot"></span> Shipped</div>
+          <div class="card-visual"><span class="card-visual-text">S&P</span></div>
+          <div class="card-body">
+            <div class="card-title">Salt & Prepper</div>
+            <div class="card-sub">AI meeting prep — walk into every coffee chat already knowing the room</div>
+          </div>
+          <div class="card-actions">
+            <a class="card-btn" href="https://salt-and-prepper.vercel.app" target="_blank">View Project ↗</a>
+            <button class="card-btn" onclick="showPage('page-salt')">Case Study →</button>
+          </div>
+        </div>
+        <div class="cs-accordion" id="cs-salt">
+          <div class="cs-accordion-inner">
+
+            <div class="cs-section">
+              <div class="cs-sec-label">The Setup</div>
+              <div class="cs-hint">
+                <p>Where did Salt & Prepper come from? What personal pain point kicked it off — what were you doing before that felt broken or slow?</p>
+                <p>Describe what the product does and who it's for in plain terms.</p>
+              </div>
+            </div>
+
+            <hr class="cs-rule"/>
+
+            <div class="cs-section">
+              <div class="cs-sec-label">The Problem</div>
+              <div class="cs-hint">
+                <p>What does meeting prep look like today — and what's wrong with it? Who's the user, and what's the specific friction you're solving? What insight made you realize this was worth building?</p>
+              </div>
+            </div>
+
+            <hr class="cs-rule"/>
+
+            <div class="cs-section">
+              <div class="cs-sec-label">My Process</div>
+              <div class="cs-hint">
+                <p>How did you spec this out? What decisions went into the prompt design, the two-pass research architecture, the output format? Walk through your thinking.</p>
+              </div>
+            </div>
+
+            <hr class="cs-rule"/>
+
+            <div class="cs-section">
+              <div class="cs-sec-label">The Key Decision</div>
+              <div class="cs-hint">
+                <p>What did you choose to cut from v1? What output decisions did you debate? What made you land on the conversation opener structure?</p>
+              </div>
+              <div class="cs-pullquote" style="margin-top:24px;">
+                <p>"[Your most important insight about what makes meeting prep actually useful vs. just comprehensive.]"</p>
+              </div>
+            </div>
+
+            <hr class="cs-rule"/>
+
+            <div class="cs-section">
+              <div class="cs-sec-label">The Outcome</div>
+              <div class="cs-callout">
+                <div class="cs-callout-label">Where it stands</div>
+                <p>[What's been built, what's shipped, what's next. How do you use it personally?]</p>
+              </div>
+            </div>
+
+            <hr class="cs-rule"/>
+
+            <div class="cs-section">
+              <div class="cs-sec-label">What I'd Do Differently</div>
+              <div class="cs-hint">
+                <p>What would you change about how you approached building this?</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /row 1 -->
+
+    <!-- Row 2 -->
+    <div class="project-row">
+
+      <!-- Tutor Tree -->
+      <div class="project-card-wrap">
+        <div class="project-card">
+          <div class="badge shipped"><span class="badge-dot"></span> Shipped</div>
+          <div class="card-visual"><span class="card-visual-text">TT</span></div>
+          <div class="card-body">
+            <div class="card-title">Tutor Tree</div>
+            <div class="card-sub">E-commerce marketplace for high school tutoring · $20K revenue</div>
+          </div>
+          <div class="card-actions">
+            <!-- UPDATE href with live URL if it still exists, or remove/disable -->
+            <a class="card-btn disabled" href="#" target="_blank">View Project ↗</a>
+            <button class="card-btn" onclick="showPage('page-tutortree')">Case Study →</button>
+          </div>
+        </div>
+        <div class="cs-accordion" id="cs-tutortree">
+          <div class="cs-accordion-inner">
+
+            <div class="cs-section">
+              <div class="cs-sec-label">The Setup</div>
+              <div class="cs-prose">
+                <p>Tutor Tree was an e-commerce marketplace connecting high school students across Long Island with peer tutors. I co-founded it in September 2023 with the goal of making quality tutoring more accessible and less dependent on expensive private agencies.</p>
+                <p>My role covered everything: product, marketing, growth, and day-to-day operations. Over the course of the year I led a team of five, grew to 100+ student-tutors across multiple NY high schools, and drove the platform to $20,000 in total revenue before winding it down in August 2024.</p>
+              </div>
+            </div>
+
+            <hr class="cs-rule"/>
+
+            <div class="cs-section">
+              <div class="cs-sec-label">The Problem</div>
+              <div class="cs-hint">
+                <p>What was broken about how high school students found tutors before Tutor Tree? What was the insight that made you think a marketplace could work here? Who were you really solving for — students, tutors, or both?</p>
+              </div>
+            </div>
+
+            <hr class="cs-rule"/>
+
+            <div class="cs-section">
+              <div class="cs-sec-label">My Process</div>
+              <div class="cs-hint">
+                <p>How did you build the supply side (getting tutors on the platform) and the demand side (getting students to book)? What did distribution look like — the Instagram Reels strategy, the referral loops? What did you learn about growing a two-sided marketplace?</p>
+              </div>
+            </div>
+
+            <hr class="cs-rule"/>
+
+            <div class="cs-section">
+              <div class="cs-sec-label">The Key Decision</div>
+              <div class="cs-hint">
+                <p>What was the hardest product or business decision you made? What did you say no to, and why? Walk through a specific moment where you had to make a call with incomplete information.</p>
+              </div>
+              <div class="cs-pullquote" style="margin-top:24px;">
+                <p>"[Your most important insight from a year of running Tutor Tree — one sentence that captures what you learned about building and scaling a marketplace.]"</p>
+              </div>
+            </div>
+
+            <hr class="cs-rule"/>
+
+            <div class="cs-section">
+              <div class="cs-sec-label">The Outcome</div>
+              <div class="cs-callout">
+                <div class="cs-callout-label">Results</div>
+                <p>$20,000 in total revenue · 100+ student-tutors across multiple NY high schools · 300+ tutoring sessions · 4.8/5 star rating · 10,000+ organic views via Instagram Reels and referral loops · Team of 5 managed.</p>
+              </div>
+            </div>
+
+            <hr class="cs-rule"/>
+
+            <div class="cs-section">
+              <div class="cs-sec-label">What I'd Do Differently</div>
+              <div class="cs-hint">
+                <p>What would you change about how you built Tutor Tree — product decisions, GTM choices, how you grew the team? What did founding a company teach you that you carry into everything you build now?</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- CET Sandbox — NOT SHAREABLE -->
+      <div class="project-card-wrap is-locked">
+        <div class="project-card locked-card" onclick="showPage('page-ns-cet')">
+          <div class="badge locked-badge"><span class="badge-dot"></span> Not Shareable</div>
+          <div class="lock-overlay"></div>
+          <div class="card-visual"><span class="card-visual-text">CET</span></div>
+          <div class="card-body">
+            <div class="card-title">CET Sandbox GTM Bot</div>
+            <div class="card-sub">Internal RAG system for U.S. defense-tech commercialization</div>
+          </div>
+          <div class="card-actions">
+            <button class="card-btn disabled">View Project ↗</button>
+            <button class="card-btn" onclick="event.stopPropagation(); showPage('page-ns-cet')">Case Study →</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /row 2 -->
+
+    <!-- Row 3 — TikTok (half width) -->
+    <div class="project-row">
+
+      <!-- TikTok — NOT SHAREABLE -->
+      <div class="project-card-wrap is-locked">
+        <div class="project-card locked-card" style="min-height:200px;" onclick="showPage('page-ns-tiktok')">
+          <div class="badge locked-badge"><span class="badge-dot"></span> Not Shareable</div>
+          <div class="lock-overlay"></div>
+          <div class="card-visual"><span class="card-visual-text">TK</span></div>
+          <div class="card-body">
+            <div class="card-title">TikTok Search Product</div>
+            <div class="card-sub">Original search product research, currently in TikTok's deal pipeline</div>
+          </div>
+          <div class="card-actions">
+            <button class="card-btn disabled">View Project ↗</button>
+            <button class="card-btn" onclick="event.stopPropagation(); showPage('page-ns-tiktok')">Case Study →</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:transparent;"></div>
+
+    </div><!-- /row 3 -->
+
+  </div><!-- /project-list -->
+
+  <!-- About -->
+  <section class="about-section" id="about-anchor">
+    <div class="about-inner">
+      <div>
+        <div class="about-label">About</div>
+        <div class="about-text">
+          I'm Ari, a junior at Columbia studying CS and History through their joint program with Tel Aviv University. I was born in Los Angeles and grew up between Washington DC and New York.
+          <br/><br/>
+          <strong style="font-weight:700;">I build products to make work and school easier for me and the people around me, and I'm always working on something new.</strong>
+          <br/><br/>
+          In my early career, I've interned at TikTok in Business Development, working on product partnerships with Fortune 500 companies, and at CET Sandbox — a hub for deep-tech startups — as a Solutions Engineer.
+          <br/><br/>
+          Outside of work I'm traveling, playing sports, or finding my next favorite restaurant. This summer, I'm looking for a product internship where I can learn and add value.
+        </div>
+      </div>
+      <div>
+        <div class="about-row">
+          <span class="about-row-label">Currently</span>
+          <span class="about-row-val">Columbia University · CS &amp; History, Class of 2027</span>
+        </div>
+        <div class="about-row">
+          <span class="about-row-label">Previously</span>
+          <span class="about-row-val">TikTok · Business Development<br/>CET Sandbox · Solutions Engineer</span>
+        </div>
+        <div class="about-row">
+          <span class="about-row-label">Built</span>
+          <span class="about-row-val">Tutor Tree · Course Vault · Salt & Prepper</span>
+        </div>
+        <div class="about-row">
+          <span class="about-row-label">Looking for</span>
+          <span class="about-row-val">Product internships · Summer / Fall 2026</span>
+        </div>
+        <div class="about-row">
+          <span class="about-row-label">Languages</span>
+          <span class="about-row-val">English · Persian · Hebrew</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Ariel Greenblatt · 2026</span>
+    <div class="foot-links">
+      <a href="https://www.linkedin.com/in/ariel-g-945081217/" target="_blank">LinkedIn</a>
+      <a href="mailto:akg2196@columbia.edu">akg2196@columbia.edu</a><a href="tel:9177766364">917-776-6364</a>
+    </div>
+  </footer>
+
+</div>
+</div><!-- /page-home -->
+
+
+<!-- ═══════════════ NOT SHAREABLE — CET ═══════════════ -->
+<div class="page" id="page-ns-cet">
+<div class="wrap">
+  <nav>
+    <button class="nav-name" onclick="showPage('page-home')">Ariel Greenblatt</button>
+    <div class="nav-right"><button onclick="showPage('page-home')">← Work</button></div>
+  </nav>
+</div>
+<div class="wrap-mid ns-page">
+  <div class="ns-body">
+    <div class="ns-icon">⊘</div>
+    <div class="badge locked-badge" style="position:static;"><span class="badge-dot"></span> Not Shareable</div>
+    <div class="ns-title">CET Sandbox<br/>GTM Bot</div>
+    <p class="ns-desc">
+      This project is internal and confidential to CET Sandbox, an Israeli-U.S. defense-tech network. The work involved building a RAG system using Ollama, LlamaIndex, and FAISS to support U.S. commercialization strategy for 20 dual-use startups — the specifics can't be shared publicly.
+    </p>
+    <p class="ns-desc">
+      Happy to discuss the methodology, technical architecture, and what I learned in a conversation. Reach out directly.
+    </p>
+    <a class="ns-email" href="/cdn-cgi/l/email-protection#f0919b97c2c1c9c6b0939f9c859d929991de959485"><span class="__cf_email__" data-cfemail="0362686431323a3543606c6f766e616a622d666776">[email&#160;protected]</span> ↗</a>
+    <button class="ns-back" onclick="showPage('page-home')">← Back to work</button>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════ NOT SHAREABLE — TIKTOK ═══════════════ -->
+<div class="page" id="page-ns-tiktok">
+<div class="wrap">
+  <nav>
+    <button class="nav-name" onclick="showPage('page-home')">Ariel Greenblatt</button>
+    <div class="nav-right"><button onclick="showPage('page-home')">← Work</button></div>
+  </nav>
+</div>
+<div class="wrap-mid ns-page">
+  <div class="ns-body">
+    <div class="ns-icon">⊘</div>
+    <div class="badge locked-badge" style="position:static;"><span class="badge-dot"></span> Not Shareable</div>
+    <div class="ns-title">TikTok Search<br/>Product</div>
+    <p class="ns-desc">
+      During my Business Development internship at TikTok, I independently researched and developed a TikTok Search product, which I pitched to the lead PM. The product is currently in TikTok's deal pipeline — the specifics are confidential.
+    </p>
+    <p class="ns-desc">
+      Happy to walk through my research process, how I identified the opportunity, and what the pitch looked like. Just reach out.
+    </p>
+    <a class="ns-email" href="/cdn-cgi/l/email-protection#a9c8c2ce9b98909fe9cac6c5dcc4cbc0c887cccddc"><span class="__cf_email__" data-cfemail="70111b174241494630131f1c051d1219115e151405">[email&#160;protected]</span> ↗</a>
+    <button class="ns-back" onclick="showPage('page-home')">← Back to work</button>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════ COURSE VAULT ═══════════════ -->
+<div class="page" id="page-coursevault">
+<div class="wrap">
+  <nav>
+    <button class="nav-name" onclick="showPage('page-home')">Ariel Greenblatt</button>
+    <div class="nav-right"><button onclick="showPage('page-home')">← Work</button></div>
+  </nav>
+</div>
+<div class="wrap-mid ns-page">
+  <div class="ns-body" style="max-width:640px;">
+    <div class="badge shipped" style="position:static;"><span class="badge-dot"></span> Shipped</div>
+    <div class="ns-title">Course Vault</div>
+
+    <div class="cs-section">
+      <div class="cs-sec-label">The Setup</div>
+      <div class="cs-prose">
+        <p>Course Vault is a web application that converts course material into an interactive, hierarchical database for custom learning. You upload a syllabus, and the system breaks your course down into chapters, topics, and concepts — each enriched by AI with a summary, vocabulary, and examples.</p>
+        <p>The inspiration came from object-oriented programming, or OOP — a way of writing code where you organize everything into objects, which are individual units that hold specific properties and belong to larger categories called classes. When I first learned OOP, I saw a direct parallel to how knowledge is structured in any course: a concept (like "Structuralism") has properties (a definition, examples, vocabulary), belongs to a topic (Schools of Thought), which belongs to a chapter (History of Psychology), which belongs to a course. The hierarchy felt obvious once I saw it.</p>
+        <p>What surprised me was how much better I performed in my liberal arts courses when I started organizing them the same way my CS courses were naturally organized. I did some research and found the science backed it up: we encode new information more effectively when it attaches to an existing structure. Schema theory explains why — a framework helps your brain interpret incoming information instead of treating it as unrelated bits. Hierarchical organization also reduces cognitive load by letting you chunk related ideas together, protecting limited working memory and making retrieval significantly stronger. I wanted to give that structure to any course, and use AI to fill the gaps quickly.</p>
+      </div>
+    </div>
+
+    <hr class="cs-rule"/>
+
+    <div class="cs-section">
+      <div class="cs-sec-label">The Problem</div>
+      <div class="cs-prose">
+        <p>Most study tools — Quizlet, Anki, Notion — are flat. Flashcards are a list. Notes are a document. They give you content but not architecture. You have to hold the structure in your head yourself, which is exactly the cognitive load problem they're supposed to solve.</p>
+        <p>The deeper opportunity I saw was that the meticulously organized structure that makes CS intuitive — where concepts are nested inside topics, inside chapters, inside courses — almost never gets applied to liberal arts. History, psychology, economics: these subjects have just as much internal logic, but students rarely engage with them that way. I wanted to change that.</p>
+      </div>
+    </div>
+
+    <hr class="cs-rule"/>
+
+    <div class="cs-section">
+      <div class="cs-sec-label">My Process</div>
+      <div class="cs-prose">
+        <p>I built the application using Claude and Cursor as my primary development tools, working through the architecture iteratively. Before writing any code, I ran informal conversations with friends about what the right UI should look like — what made sense, what felt confusing, what they'd actually use.</p>
+        <p>The biggest design tension was around the course map view. One camp felt that showing all concepts across all topics at once was overwhelming — too much on screen. Another felt that seeing the full hierarchy simultaneously was the whole point, the thing that made the product different from everything else. I tried to navigate both sides through a staged workshop flow: you build the structure level by level (chapters, then topics, then concepts), approving each layer before moving to the next. That way the map feels earned by the time you see it in full.</p>
+        <p>On the technical side, the hardest problems were the API integrations. Claude's responses kept getting cut off mid-JSON when token limits were too low, and internal fetch calls between Next.js routes were failing silently. I learned to debug by adding structured console logs at each step of the pipeline, reading the raw API responses before parsing, and isolating exactly where in the chain things were breaking. Every bug had a specific cause — and finding it was a matter of narrowing the problem systematically until I could see it clearly.</p>
+      </div>
+    </div>
+
+    <hr class="cs-rule"/>
+
+    <div class="cs-section">
+      <div class="cs-sec-label">Key Insight</div>
+      <div class="cs-pullquote">
+        <p>"Technical problems don't stay hard once you stop treating them as one big thing and start finding the exact line where it breaks."</p>
+      </div>
+    </div>
+
+    <hr class="cs-rule"/>
+
+    <div class="cs-section">
+      <div class="cs-sec-label">Where It Is Now</div>
+      <div class="cs-prose">
+        <p>Course Vault is live and working. I've found that it performs better on science-heavy courses — psychology, biology, introductory CS — where syllabi tend to be structured and concept boundaries are clear. Upper-level liberal arts courses, where a single "concept" might span decades of historiography, are harder to break down cleanly, and that's the next problem I want to solve.</p>
+        <p>The feature I'm most excited to build next is an auto-upload flow: you drop in a single page of notes or a slide deck, and the system figures out exactly where in your course map that content belongs — no manual placement required. The goal is to make adding material feel effortless enough that students actually do it.</p>
+      </div>
+    </div>
+
+    <a class="card-btn" href="https://course-vault-tau.vercel.app" target="_blank" style="display:inline-flex;align-items:center;gap:6px;margin-top:32px;font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-mid);text-decoration:none;transition:color 0.2s;">View Live Project ↗</a>
+    <button class="ns-back" onclick="showPage('page-home')">← Back to work</button>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════ SALT & PREPPER ═══════════════ -->
+<div class="page" id="page-salt">
+<div class="wrap">
+  <nav>
+    <button class="nav-name" onclick="showPage('page-home')">Ariel Greenblatt</button>
+    <div class="nav-right"><button onclick="showPage('page-home')">← Work</button></div>
+  </nav>
+</div>
+<div class="wrap-mid ns-page">
+  <div class="ns-body" style="max-width:640px;">
+    <div class="badge shipped" style="position:static;"><span class="badge-dot"></span> Shipped</div>
+    <div class="ns-title">Salt & Prepper</div>
+
+    <div class="cs-section">
+      <div class="cs-sec-label">The Setup</div>
+      <div class="cs-prose">
+        <p>Salt & Prepper is an AI meeting prep tool I built for coffee chats, informational interviews, and networking conversations. You put in a name, a company, and what you're going for — and it hands you back a structured prep sheet covering the person's background, what the company does, recent news, and open roles.</p>
+        <p>The idea came from noticing a pattern in myself. Before every coffee chat, I'd end up doing the same sequence of searches — LinkedIn, company website, recent news, job listings — and then trying to synthesize it all into something coherent before the conversation. When you find yourself doing the same thing over and over again, that's usually a sign there's a tool missing. I decided to build it.</p>
+      </div>
+    </div>
+
+    <hr class="cs-rule"/>
+
+    <div class="cs-section">
+      <div class="cs-sec-label">The Problem</div>
+      <div class="cs-prose">
+        <p>I had been using complex prompts in ChatGPT to do this, but ran into a consistent problem: hallucinations. It would confidently invent internship opportunities that didn't exist, attribute quotes to people who never said them, and describe products that had been discontinued. For a tool you're relying on before a real conversation with a real person, that's a serious failure mode.</p>
+        <p>The core problem was that general-purpose language models don't search the web in real time — they generate from training data, which means anything recent or specific is a guess. What I needed was a system that could actually go look things up, not one that would confidently fill in the blanks.</p>
+      </div>
+    </div>
+
+    <hr class="cs-rule"/>
+
+    <div class="cs-section">
+      <div class="cs-sec-label">My Process</div>
+      <div class="cs-prose">
+        <p>The solution was combining two APIs: Perplexity for real-time research, and Claude for synthesis. Perplexity is built on top of live web search — it actually retrieves current information rather than generating from memory. I use it to run four parallel searches for every prep sheet: one on the person, one on the company, one on recent news, and one on open roles. The results come back as raw research, which I then pass to Claude to synthesize into a clean, structured document written for the specific angle of the meeting.</p>
+        <p>The alternative I considered was raw web scraping — writing code that would directly pull from LinkedIn, company career pages, and news sites. The problem is that scraping is brittle: websites change their HTML constantly, LinkedIn actively blocks scrapers, and maintaining it would have become a project in itself. The Perplexity API gave me the same live data without any of that infrastructure.</p>
+        <p>On the design side, I had a specific goal: coffee chats are professional and serious, but the tool itself should feel calm and a little playful — something that takes the stress out of prep rather than adding to it. I looked at Framer templates for inspiration and built the UI around a circular design language tied to the salt and pepper theme. The shakers tilt when you hover over them, the opening animation blooms from a single circle, and the pantry where your past sheets live is made of circles. It's subtle enough not to feel gimmicky, but distinct enough to be memorable.</p>
+      </div>
+    </div>
+
+    <hr class="cs-rule"/>
+
+    <div class="cs-section">
+      <div class="cs-sec-label">Key Insight</div>
+      <div class="cs-pullquote">
+        <p>"The best tools eliminate repeat work so completely that you forget you ever did it manually."</p>
+      </div>
+    </div>
+
+    <hr class="cs-rule"/>
+
+    <div class="cs-section">
+      <div class="cs-sec-label">Where It Is Now</div>
+      <div class="cs-prose">
+        <p>Salt & Prepper is live. Some early feedback suggested the transitions and animations are too much — that simpler would feel more trustworthy for something you're using before a serious conversation. That's a fair note and something I'm thinking about.</p>
+        <p>The next feature I want to build is a pre-written thank you note generator: after your meeting, you fill in a few quick details about how it went, and the tool drafts a follow-up you can edit and send. The goal is to make the whole coffee chat process — prep, conversation, follow-up — feel handled, so you can focus on the conversation itself.</p>
+      </div>
+    </div>
+
+    <a class="card-btn" href="https://salt-and-prepper.vercel.app" target="_blank" style="display:inline-flex;align-items:center;gap:6px;margin-top:32px;font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-mid);text-decoration:none;transition:color 0.2s;">View Live Project ↗</a>
+    <button class="ns-back" onclick="showPage('page-home')">← Back to work</button>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════ TUTOR TREE ═══════════════ -->
+<div class="page" id="page-tutortree">
+<div class="wrap">
+  <nav>
+    <button class="nav-name" onclick="showPage('page-home')">Ariel Greenblatt</button>
+    <div class="nav-right"><button onclick="showPage('page-home')">← Work</button></div>
+  </nav>
+</div>
+<div class="wrap-mid ns-page">
+  <div class="ns-body">
+    <div class="badge shipped" style="position:static;"><span class="badge-dot"></span> Shipped</div>
+    <div class="ns-title">Tutor Tree</div>
+    <p class="ns-desc">
+      Tutor Tree was an e-commerce tutoring marketplace connecting high school students with peer tutors across Long Island.
+    </p>
+    <p class="ns-desc">
+      The business reached $20K in revenue, 100+ student-tutors, and 300+ sessions, and is now represented as its own standalone detail page from Learn More.
+    </p>
+    <button class="ns-back" onclick="showPage('page-home')">← Back to work</button>
+  </div>
+</div>
+</div>
+
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
+  function goToAbout() {
+    showPage('page-home');
+    setTimeout(() => {
+      const el = document.getElementById('about-anchor');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }, 50);
+  }
+
+  function toggleCS(id, btn) {
+    const panel = document.getElementById(id);
+    const isOpen = panel.classList.contains('open');
+
+    // Close all panels first
+    document.querySelectorAll('.cs-accordion').forEach(p => p.classList.remove('open'));
+    document.querySelectorAll('.card-btn').forEach(b => {
+      if (b.textContent.includes('↑') || b.te
