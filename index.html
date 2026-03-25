@@ -532,7 +532,7 @@
   <nav>
     <button type="button" class="nav-name" data-nav-page="page-home">Ariel Greenblatt</button>
     <div class="nav-right">
-      <button type="button" onclick="goToAbout()">About</button>
+      <button type="button" data-nav-about="1">About</button>
       <a href="mailto:akg2196@columbia.edu">Contact</a>
     </div>
   </nav>
@@ -1267,21 +1267,23 @@
     window.showPage = showPage;
 
     document.addEventListener('click', function (e) {
+      var aboutBtn = e.target.closest('[data-nav-about]');
+      if (aboutBtn) {
+        e.preventDefault();
+        showPage('page-home');
+        setTimeout(function () {
+          var aboutEl = document.getElementById('about-anchor');
+          if (aboutEl) aboutEl.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+        return;
+      }
       var el = e.target.closest('[data-nav-page]');
       if (!el) return;
       var id = el.getAttribute('data-nav-page');
       if (!id) return;
       e.preventDefault();
       showPage(id);
-    });
-
-    window.goToAbout = function () {
-      showPage('page-home');
-      setTimeout(function () {
-        var aboutEl = document.getElementById('about-anchor');
-        if (aboutEl) aboutEl.scrollIntoView({ behavior: 'smooth' });
-      }, 50);
-    };
+    }, true);
   })();
 </script>
 </body>
