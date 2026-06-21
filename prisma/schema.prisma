@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Contact {
+  id          String   @id @default(cuid())
+  name        String
+  companyId   String?
+  company     Company? @relation(fields: [companyId], references: [id])
+  role        String
+  email       String?
+  linkedin    String?
+  purpose     String
+  strength    Int
+  lastContact DateTime
+  tags        String   @default("[]")
+  createdAt   DateTime @default(now())
+  notes       Note[]
+}
+
+model Note {
+  id          String   @id @default(cuid())
+  contactId   String
+  contact     Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  body        String
+  meetingDate DateTime
+  purpose     String
+  createdAt   DateTime @default(now())
+}
+
+model Company {
+  id          String   @id @default(cuid())
+  name        String
+  website     String?
+  description String?
+  sector      String
+  stage       String
+  status      String
+  geography   String?
+  createdAt   DateTime @default(now())
+  todos       Todo[]
+  contacts    Contact[]
+  execs       Exec[]
+}
+
+model Todo {
+  id        String   @id @default(cuid())
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  label     String
+  done      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Exec {
+  id        String   @id @default(cuid())
+  name      String
+  title     String
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  linkedin  String?
+  relevance String
+  headshot  String?
+}
+
+model Event {
+  id       String   @id @default(cuid())
+  name     String
+  date     DateTime
+  location String
+  virtual  Boolean  @default(false)
+  type     String
+  tags     String   @default("[]")
+  link     String?
+  rsvp     Boolean  @default(false)
+}
+
+model Article {
+  id          String   @id @default(cuid())
+  source      String
+  title       String
+  summary     String
+  url         String
+  publishedAt DateTime
+  companyTags String   @default("[]")
+  category    String
+  saved       Boolean  @default(false)
+}
+
+model Trend {
+  id          String   @id @default(cuid())
+  rank        Int
+  companyName String
+  why         String
+  sector      String
+  momentum    String
+  metric      String
+  link        String?
+  spotlight   Boolean  @default(false)
+  updatedAt   DateTime @updatedAt
+}
