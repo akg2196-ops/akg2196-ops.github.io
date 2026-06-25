@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import {
   ReactFlow,
   Background,
@@ -17,20 +17,24 @@ import {
 
 import CompanyNode from './components/CompanyNode'
 import PersonNode from './components/PersonNode'
-import SidePanel, { type SidePanelSelection } from './components/SidePanel'
 
-import { defaultPositions, type AppData } from './data'
+import { defaultPositions, type AppData, type Selection } from './data'
 import { useApp } from './context'
+import { useState } from 'react'
 
 const nodeTypes = { company: CompanyNode, person: PersonNode }
 
 // ── Graph state builders ────────────────────────────────────────────────────
 
-type Selection = SidePanelSelection | null
-
-function buildNodes(data: AppData, sel: Selection, positions: Record<string, XYPosition>): Node[] {
+function buildNodes(
+  data: AppData,
+  sel: Selection | null,
+  positions: Record<string, XYPosition>,
+  searchQuery: string,
+): Node[] {
   const selId = sel?.id ?? null
   const selKind = sel?.kind ?? null
+  const q = searchQuery.trim().toLowerCase()
 
   const connectedToSelected = new Set<string>()
   if (selId) {
@@ -43,7 +47,13 @@ function buildNodes(data: AppData, sel: Selection, positions: Record<string, XYP
   const companyNodes: Node[] = data.companies.map((c) => {
     const selected = selId === c.id
     const highlighted = !selected && selId !== null && connectedToSelected.has(c.id)
-    const dimmed = selId !== null && !selected && !highlighted
+    let dimmed = selId !== null && !selected && !highlighted
+    if (q && !dimmed) {
+      const matches =
+        c.name.toLowerCase().includes(q) ||
+        c.roles.some((r) => r.title.toLowerCase().includes(q))
+      if (!matches) dimmed = true
+    }
     return {
       id: c.id,
       type: 'company',
@@ -55,7 +65,14 @@ function buildNodes(data: AppData, sel: Selection, positions: Record<string, XYP
   const personNodes: Node[] = data.people.map((p) => {
     const selected = selId === p.id
     const highlighted = !selected && selId !== null && connectedToSelected.has(p.id)
-    const dimmed = selId !== null && !selected && !highlighted
+    let dimmed = selId !== null && !selected && !highlighted
+    if (q && !dimmed) {
+      const matches =
+        p.name.toLowerCase().includes(q) ||
+        (p.currentCompany?.toLowerCase().includes(q) ?? false) ||
+        (p.role?.toLowerCase().includes(q) ?? false)
+      if (!matches) dimmed = true
+    }
     return {
       id: p.id,
       type: 'person',
@@ -67,7 +84,7 @@ function buildNodes(data: AppData, sel: Selection, positions: Record<string, XYP
   return [...companyNodes, ...personNodes]
 }
 
-function buildEdges(data: AppData, sel: Selection, hoveredId: string | null): Edge[] {
+function buildEdges(data: AppData, sel: Selection | null, hoveredId: string | null): Edge[] {
   const selId = sel?.id ?? null
   const selKind = sel?.kind ?? null
 
@@ -107,10 +124,15 @@ function buildEdges(data: AppData, sel: Selection, hoveredId: string | null): Ed
 
 // ── Graph component ─────────────────────────────────────────────────────────
 
-export default function Graph() {
+type Props = {
+  selection: Selection | null
+  onSelectionChange: (s: Selection | null) => void
+  searchQuery: string
+}
+
+export default function Graph({ selection, onSelectionChange, searchQuery }: Props) {
   const { data } = useApp()
 
-  const [sel, setSel] = useState<Selection>(null)
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null)
 
   const positionsRef = useRef<Record<string, XYPosition>>({})
@@ -118,11 +140,11 @@ export default function Graph() {
   const [rfNodes, setRfNodes, onRfNodesChange] = useNodesState<Node>([])
   const [rfEdges, setRfEdges, onRfEdgesChange] = useEdgesState<Edge>([])
 
-  // Rebuild nodes/edges whenever data, selection, or hover changes
+  // Rebuild nodes/edges whenever data, selection, hover, or search changes
   useEffect(() => {
-    setRfNodes(buildNodes(data, sel, positionsRef.current))
-    setRfEdges(buildEdges(data, sel, hoveredEdgeId))
-  }, [data, sel, hoveredEdgeId]) // eslint-disable-line
+    setRfNodes(buildNodes(data, selection, positionsRef.current, searchQuery))
+    setRfEdges(buildEdges(data, selection, hoveredEdgeId))
+  }, [data, selection, hoveredEdgeId, searchQuery]) // eslint-disable-line
 
   // Track dragged positions
   const onNodesChange = useCallback(
@@ -137,15 +159,20 @@ export default function Graph() {
     [onRfNodesChange]
   )
 
-  const onNodeClick: NodeMouseHandler = useCallback((_e, node) => {
-    const kind = node.type === 'company' ? 'company' : 'person'
-    setSel((prev) => (prev?.id === node.id ? null : { kind, id: node.id }))
-  }, [])
+  const onNodeClick: NodeMouseHandler = useCallback(
+    (_e, node) => {
+      const kind = node.type === 'company' ? 'company' : 'person'
+      onSelectionChange(
+        selection?.id === node.id ? null : { kind, id: node.id }
+      )
+    },
+    [selection, onSelectionChange]
+  )
 
   const onPaneClick = useCallback(() => {
-    setSel(null)
+    onSelectionChange(null)
     setHoveredEdgeId(null)
-  }, [])
+  }, [onSelectionChange])
 
   const onEdgeMouseEnter: EdgeMouseHandler = useCallback((_e, edge) => {
     setHoveredEdgeId(edge.id)
@@ -184,12 +211,6 @@ export default function Graph() {
         />
         <Controls position="bottom-right" showInteractive={false} />
       </ReactFlow>
-
-      <SidePanel
-        selection={sel}
-        onClose={() => setSel(null)}
-        onDeleted={() => setSel(null)}
-      />
     </div>
   )
 }

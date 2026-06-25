@@ -1,5 +1,55 @@
 // ── Types ──────────────────────────────────────────────────────────────────
 
+export type ApplicationStatus =
+  | 'not_applied'
+  | 'applied'
+  | 'interviewing'
+  | 'offer'
+  | 'rejected'
+  | 'pass'
+
+export type OutreachStatus =
+  | 'not_contacted'
+  | 'reached_out'
+  | 'responded'
+  | 'met'
+  | 'referred'
+
+export const APP_STATUS_LABEL: Record<ApplicationStatus, string> = {
+  not_applied: 'Not applied',
+  applied: 'Applied',
+  interviewing: 'Interviewing',
+  offer: 'Offer',
+  rejected: 'Rejected',
+  pass: 'Pass',
+}
+
+export const OUTREACH_STATUS_LABEL: Record<OutreachStatus, string> = {
+  not_contacted: 'Not contacted',
+  reached_out: 'Reached out',
+  responded: 'Responded',
+  met: 'Met',
+  referred: 'Referred',
+}
+
+// Subtle dot colors — functional, not decorative
+export const APP_STATUS_COLOR: Record<ApplicationStatus, string> = {
+  not_applied: 'transparent',
+  applied: '#60a5fa',
+  interviewing: '#fbbf24',
+  offer: '#34d399',
+  rejected: '#9ca3af',
+  pass: '#6b7280',
+}
+
+export const OUTREACH_STATUS_COLOR: Record<OutreachStatus, string> = {
+  not_contacted: 'transparent',
+  reached_out: '#60a5fa',
+  responded: '#fbbf24',
+  met: '#34d399',
+  referred: '#a78bfa',
+}
+
 export type Role = {
   id: string
   title: string
@@ -15,6 +65,7 @@ export type Company = {
   roles: Role[]
   applicationDeadline?: string
   notes?: string
+  applicationStatus?: ApplicationStatus
 }
 
 export type Person = {
@@ -26,6 +77,7 @@ export type Person = {
   university?: string
   howWeMet?: string
   backlinks?: { label: string; url: string }[]
+  outreachStatus?: OutreachStatus
 }
 
 export type Connection = {
@@ -40,6 +92,10 @@ export type AppData = {
   people: Person[]
   connections: Connection[]
 }
+
+export type Selection =
+  | { kind: 'company'; id: string }
+  | { kind: 'person'; id: string }
 
 // ── Seed companies ──────────────────────────────────────────────────────────
 

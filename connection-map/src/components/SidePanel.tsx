@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react'
 import { useApp } from '../context'
-import type { Role } from '../data'
+import {
+  APP_STATUS_COLOR,
+  APP_STATUS_LABEL,
+  OUTREACH_STATUS_COLOR,
+  OUTREACH_STATUS_LABEL,
+  type ApplicationStatus,
+  type OutreachStatus,
+  type Role,
+  type Selection,
+} from '../data'
 import AddConnectionModal from './AddConnectionModal'
 import ConfirmDialog from './ConfirmDialog'
-
-type Selection =
-  | { kind: 'company'; id: string }
-  | { kind: 'person'; id: string }
 
 type Props = {
   selection: Selection | null
@@ -49,6 +54,54 @@ function Shell({ label, children, onClose }: { label: string; children: React.Re
   )
 }
 
+// ── Status picker (inline, no edit mode needed) ────────────────────────────
+
+function StatusPicker<T extends string>({
+  label,
+  options,
+  labels,
+  colors,
+  value,
+  onChange,
+}: {
+  label: string
+  options: T[]
+  labels: Record<T, string>
+  colors: Record<T, string>
+  value: T
+  onChange: (v: T) => void
+}) {
+  return (
+    <Section label={label}>
+      <div className="flex flex-wrap gap-1.5">
+        {options.map((opt) => {
+          const active = value === opt
+          const color = colors[opt]
+          const isNone = color === 'transparent'
+          return (
+            <button
+              key={opt}
+              onClick={() => onChange(opt)}
+              style={{
+                borderColor: active ? (isNone ? 'var(--text-primary)' : color) : 'var(--border)',
+                color: active ? (isNone ? 'var(--text-primary)' : color) : 'var(--text-secondary)',
+                backgroundColor: active ? `${isNone ? 'var(--border)' : color}18` : 'transparent',
+                fontSize: '11px',
+              }}
+              className="border rounded-md px-2 py-1 font-medium transition-all hover:opacity-80"
+            >
+              {labels[opt]}
+            </button>
+          )
+        })}
+      </div>
+    </Section>
+  )
+}
+
+const APP_STATUS_OPTIONS: ApplicationStatus[] = ['not_applied', 'applied', 'interviewing', 'offer', 'rejected', 'pass']
+const OUTREACH_STATUS_OPTIONS: OutreachStatus[] = ['not_contacted', 'reached_out', 'responded', 'met', 'referred']
+
 // ── Company panel ───────────────────────────────────────────────────────────
 
 function genRoleId() {
@@ -63,7 +116,6 @@ function CompanyPanel({ id, onClose, onDeleted }: { id: string; onClose: () => v
   const [showDelete, setShowDelete] = useState(false)
   const [showAddConn, setShowAddConn] = useState(false)
 
-  // Edit form state
   const [eName, setEName] = useState('')
   const [eTier, setETier] = useState<'S' | 'A'>('A')
   const [eRoles, setERoles] = useState<Role[]>([])
@@ -79,8 +131,6 @@ function CompanyPanel({ id, onClose, onDeleted }: { id: string; onClose: () => v
     setENotes(company.notes ?? '')
     setEditMode(true)
   }
-
-  const cancelEdit = () => setEditMode(false)
 
   const saveEdit = () => {
     if (!company || !eName.trim()) return
@@ -98,27 +148,24 @@ function CompanyPanel({ id, onClose, onDeleted }: { id: string; onClose: () => v
   const updateRole = (rid: string, patch: Partial<Role>) =>
     setERoles((rs) => rs.map((r) => (r.id === rid ? { ...r, ...patch } : r)))
   const removeRole = (rid: string) => setERoles((rs) => rs.filter((r) => r.id !== rid))
-  const addRole = () => setERoles((rs) => [...rs, { id: genRoleId(), title: '', url: '', track: 'Product', eligible: true }])
+  const addRole = () =>
+    setERoles((rs) => [...rs, { id: genRoleId(), title: '', url: '', track: 'Product', eligible: true }])
 
-  // Reset edit mode when selection changes
   useEffect(() => { setEditMode(false) }, [id])
 
   if (!company) return null
 
   const connections = data.connections.filter((c) => c.companyId === id)
+  const appStatus: ApplicationStatus = company.applicationStatus ?? 'not_applied'
 
   return (
     <Shell label="Company" onClose={onClose}>
-      {/* Header row */}
+      {/* Header */}
       <div className="flex items-start justify-between gap-2">
         {editMode ? (
           <div className="flex gap-2 flex-1">
-            <input
-              autoFocus
-              value={eName}
-              onChange={(e) => setEName(e.target.value)}
-              className="field-input flex-1 text-[15px] font-semibold"
-            />
+            <input autoFocus value={eName} onChange={(e) => setEName(e.target.value)}
+              className="field-input flex-1 text-[15px] font-semibold" />
             <select value={eTier} onChange={(e) => setETier(e.target.value as 'S' | 'A')} className="field-input">
               <option value="S">S</option>
               <option value="A">A</option>
@@ -134,7 +181,6 @@ function CompanyPanel({ id, onClose, onDeleted }: { id: string; onClose: () => v
             </div>
           </div>
         )}
-
         {!editMode && (
           <div className="flex gap-1 shrink-0">
             <button onClick={enterEdit} className="btn-ghost text-[11px]">Edit</button>
@@ -145,47 +191,38 @@ function CompanyPanel({ id, onClose, onDeleted }: { id: string; onClose: () => v
         )}
       </div>
 
+      {/* ── Application status (always visible, no edit mode) ── */}
+      {!editMode && (
+        <StatusPicker
+          label="Application status"
+          options={APP_STATUS_OPTIONS}
+          labels={APP_STATUS_LABEL}
+          colors={APP_STATUS_COLOR}
+          value={appStatus}
+          onChange={(s) => updateCompany({ ...company, applicationStatus: s })}
+        />
+      )}
+
       {/* Roles */}
       <Section label="Roles">
         {editMode ? (
           <div className="space-y-2">
             {eRoles.map((r) => (
               <div key={r.id} style={{ borderColor: 'var(--border)' }} className="border rounded-lg p-2.5 space-y-2">
-                <input
-                  type="text"
-                  value={r.title}
-                  onChange={(e) => updateRole(r.id, { title: e.target.value })}
-                  placeholder="Role title"
-                  className="field-input w-full"
-                />
+                <input type="text" value={r.title} onChange={(e) => updateRole(r.id, { title: e.target.value })}
+                  placeholder="Role title" className="field-input w-full" />
                 <div className="flex gap-2 items-center flex-wrap">
-                  <select
-                    value={r.track}
-                    onChange={(e) => updateRole(r.id, { track: e.target.value as Role['track'] })}
-                    className="field-input"
-                  >
-                    <option>Product</option>
-                    <option>Growth</option>
-                    <option>Other</option>
+                  <select value={r.track} onChange={(e) => updateRole(r.id, { track: e.target.value as Role['track'] })}
+                    className="field-input">
+                    <option>Product</option><option>Growth</option><option>Other</option>
                   </select>
                   <label className="flex items-center gap-1.5 text-[11px] cursor-pointer" style={{ color: 'var(--text-secondary)' }}>
-                    <input
-                      type="checkbox"
-                      checked={r.eligible}
-                      onChange={(e) => updateRole(r.id, { eligible: e.target.checked })}
-                    />
+                    <input type="checkbox" checked={r.eligible} onChange={(e) => updateRole(r.id, { eligible: e.target.checked })} />
                     Eligible
                   </label>
-                  <input
-                    type="url"
-                    value={r.url ?? ''}
-                    onChange={(e) => updateRole(r.id, { url: e.target.value })}
-                    placeholder="URL"
-                    className="field-input flex-1 min-w-0"
-                  />
-                  {eRoles.length > 0 && (
-                    <button onClick={() => removeRole(r.id)} style={{ color: 'var(--text-secondary)' }} className="text-[14px]">×</button>
-                  )}
+                  <input type="url" value={r.url ?? ''} onChange={(e) => updateRole(r.id, { url: e.target.value })}
+                    placeholder="URL" className="field-input flex-1 min-w-0" />
+                  <button onClick={() => removeRole(r.id)} style={{ color: 'var(--text-secondary)' }} className="text-[14px]">×</button>
                 </div>
               </div>
             ))}
@@ -202,19 +239,13 @@ function CompanyPanel({ id, onClose, onDeleted }: { id: string; onClose: () => v
                 <div key={r.id} style={{ borderColor: 'var(--border)' }} className="border rounded-lg p-2.5">
                   <div className="flex items-start justify-between gap-2">
                     {r.url ? (
-                      <a
-                        href={r.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <a href={r.url} target="_blank" rel="noopener noreferrer"
                         style={{ color: 'var(--text-primary)' }}
-                        className="text-[12px] font-medium hover:underline leading-snug"
-                      >
+                        className="text-[12px] font-medium hover:underline leading-snug">
                         {r.title} ↗
                       </a>
                     ) : (
-                      <span style={{ color: 'var(--text-primary)' }} className="text-[12px] font-medium leading-snug">
-                        {r.title}
-                      </span>
+                      <span style={{ color: 'var(--text-primary)' }} className="text-[12px] font-medium">{r.title}</span>
                     )}
                     <div className="flex gap-1 shrink-0 flex-wrap justify-end">
                       <Tag label={r.track} />
@@ -228,44 +259,28 @@ function CompanyPanel({ id, onClose, onDeleted }: { id: string; onClose: () => v
         )}
       </Section>
 
-      {/* Deadline */}
       {(editMode || company.applicationDeadline) && (
         <Section label="Deadline">
           {editMode ? (
-            <input
-              type="text"
-              value={eDeadline}
-              onChange={(e) => setEDeadline(e.target.value)}
-              placeholder="e.g. Rolling, Jul 15"
-              className="field-input w-full"
-            />
+            <input type="text" value={eDeadline} onChange={(e) => setEDeadline(e.target.value)}
+              placeholder="e.g. Rolling, Jul 15" className="field-input w-full" />
           ) : (
-            <p style={{ color: 'var(--text-secondary)' }} className="text-[12px]">
-              {company.applicationDeadline}
-            </p>
+            <p style={{ color: 'var(--text-secondary)' }} className="text-[12px]">{company.applicationDeadline}</p>
           )}
         </Section>
       )}
 
-      {/* Notes */}
       {(editMode || company.notes) && (
         <Section label="Notes">
           {editMode ? (
-            <textarea
-              value={eNotes}
-              onChange={(e) => setENotes(e.target.value)}
-              rows={3}
-              className="field-input w-full resize-none"
-            />
+            <textarea value={eNotes} onChange={(e) => setENotes(e.target.value)}
+              rows={3} className="field-input w-full resize-none" />
           ) : (
-            <p style={{ color: 'var(--text-secondary)' }} className="text-[12px] leading-relaxed">
-              {company.notes}
-            </p>
+            <p style={{ color: 'var(--text-secondary)' }} className="text-[12px] leading-relaxed">{company.notes}</p>
           )}
         </Section>
       )}
 
-      {/* Connections */}
       <Section label={`Connections (${connections.length})`}>
         <div className="space-y-1.5">
           {connections.length === 0 ? (
@@ -274,33 +289,24 @@ function CompanyPanel({ id, onClose, onDeleted }: { id: string; onClose: () => v
             connections.map((conn) => {
               const person = data.people.find((p) => p.id === conn.personId)
               return (
-                <ConnectionRow
-                  key={conn.id}
-                  label={person?.name ?? 'Unknown'}
-                  sublabel={conn.relationship}
-                  onDelete={() => deleteConnection(conn.id)}
-                  editMode={editMode}
-                />
+                <ConnectionRow key={conn.id} label={person?.name ?? 'Unknown'} sublabel={conn.relationship}
+                  onDelete={() => deleteConnection(conn.id)} editMode={editMode} />
               )
             })
           )}
         </div>
         {!editMode && (
-          <button
-            onClick={() => setShowAddConn(true)}
-            style={{ color: 'var(--text-secondary)' }}
-            className="text-[11px] mt-2 hover:opacity-70"
-          >
+          <button onClick={() => setShowAddConn(true)} style={{ color: 'var(--text-secondary)' }}
+            className="text-[11px] mt-2 hover:opacity-70">
             + Add connection
           </button>
         )}
       </Section>
 
-      {/* Save/cancel in edit mode */}
       {editMode && (
         <div className="flex gap-2 pt-1">
           <button onClick={saveEdit} className="btn-primary text-[12px]">Save</button>
-          <button onClick={cancelEdit} className="btn-ghost text-[12px]">Cancel</button>
+          <button onClick={() => setEditMode(false)} className="btn-ghost text-[12px]">Cancel</button>
         </div>
       )}
 
@@ -311,10 +317,7 @@ function CompanyPanel({ id, onClose, onDeleted }: { id: string; onClose: () => v
           onCancel={() => setShowDelete(false)}
         />
       )}
-
-      {showAddConn && (
-        <AddConnectionModal forCompanyId={id} onClose={() => setShowAddConn(false)} />
-      )}
+      {showAddConn && <AddConnectionModal forCompanyId={id} onClose={() => setShowAddConn(false)} />}
     </Shell>
   )
 }
@@ -350,8 +353,6 @@ function PersonPanel({ id, onClose, onDeleted }: { id: string; onClose: () => vo
     setEditMode(true)
   }
 
-  const cancelEdit = () => setEditMode(false)
-
   const saveEdit = () => {
     if (!person || !eName.trim()) return
     updatePerson({
@@ -375,18 +376,15 @@ function PersonPanel({ id, onClose, onDeleted }: { id: string; onClose: () => vo
   if (!person) return null
 
   const connections = data.connections.filter((c) => c.personId === id)
+  const outreachStatus: OutreachStatus = person.outreachStatus ?? 'not_contacted'
 
   return (
     <Shell label="Contact" onClose={onClose}>
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         {editMode ? (
-          <input
-            autoFocus
-            value={eName}
-            onChange={(e) => setEName(e.target.value)}
-            className="field-input flex-1 text-[15px] font-semibold"
-          />
+          <input autoFocus value={eName} onChange={(e) => setEName(e.target.value)}
+            className="field-input flex-1 text-[15px] font-semibold" />
         ) : (
           <div>
             <h2 style={{ color: 'var(--text-primary)' }} className="text-[17px] font-semibold tracking-tight">
@@ -402,35 +400,37 @@ function PersonPanel({ id, onClose, onDeleted }: { id: string; onClose: () => vo
         {!editMode && (
           <div className="flex gap-1 shrink-0">
             <button onClick={enterEdit} className="btn-ghost text-[11px]">Edit</button>
-            <button onClick={() => setShowDelete(true)} className="btn-ghost text-[11px]" style={{ color: '#dc2626' }}>Delete</button>
+            <button onClick={() => setShowDelete(true)} className="btn-ghost text-[11px]" style={{ color: '#dc2626' }}>
+              Delete
+            </button>
           </div>
         )}
       </div>
 
-      {/* Current company + role in edit mode */}
+      {/* ── Outreach status (always visible) ── */}
+      {!editMode && (
+        <StatusPicker
+          label="Outreach status"
+          options={OUTREACH_STATUS_OPTIONS}
+          labels={OUTREACH_STATUS_LABEL}
+          colors={OUTREACH_STATUS_COLOR}
+          value={outreachStatus}
+          onChange={(s) => updatePerson({ ...person, outreachStatus: s })}
+        />
+      )}
+
       {editMode && (
         <Section label="Current">
           <div className="flex gap-2">
-            <input
-              type="text"
-              value={eCompany}
-              onChange={(e) => setECompany(e.target.value)}
-              placeholder="Company"
-              className="field-input flex-1"
-            />
-            <input
-              type="text"
-              value={eRole}
-              onChange={(e) => setERole(e.target.value)}
-              placeholder="Role"
-              className="field-input flex-1"
-            />
+            <input type="text" value={eCompany} onChange={(e) => setECompany(e.target.value)}
+              placeholder="Company" className="field-input flex-1" />
+            <input type="text" value={eRole} onChange={(e) => setERole(e.target.value)}
+              placeholder="Role" className="field-input flex-1" />
           </div>
         </Section>
       )}
 
-      {/* Background */}
-      {(!editMode && (person.university || (person.previousCompanies ?? []).length > 0)) && (
+      {!editMode && (person.university || (person.previousCompanies ?? []).length > 0) && (
         <Section label="Background">
           <div className="space-y-1">
             {person.university && <Row label="University" value={person.university} />}
@@ -442,69 +442,40 @@ function PersonPanel({ id, onClose, onDeleted }: { id: string; onClose: () => vo
       )}
 
       {editMode && (
-        <Section label="Previous companies">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={ePrev[0]}
-              onChange={(e) => setEPrev([e.target.value, ePrev[1]])}
-              placeholder="Previous 1"
-              className="field-input flex-1"
-            />
-            <input
-              type="text"
-              value={ePrev[1]}
-              onChange={(e) => setEPrev([ePrev[0], e.target.value])}
-              placeholder="Previous 2"
-              className="field-input flex-1"
-            />
-          </div>
-        </Section>
+        <>
+          <Section label="Previous companies">
+            <div className="flex gap-2">
+              <input type="text" value={ePrev[0]} onChange={(e) => setEPrev([e.target.value, ePrev[1]])}
+                placeholder="Previous 1" className="field-input flex-1" />
+              <input type="text" value={ePrev[1]} onChange={(e) => setEPrev([ePrev[0], e.target.value])}
+                placeholder="Previous 2" className="field-input flex-1" />
+            </div>
+          </Section>
+          <Section label="University">
+            <input type="text" value={eUni} onChange={(e) => setEUni(e.target.value)}
+              placeholder="e.g. Columbia" className="field-input w-full" />
+          </Section>
+        </>
       )}
 
-      {editMode && (
-        <Section label="University">
-          <input
-            type="text"
-            value={eUni}
-            onChange={(e) => setEUni(e.target.value)}
-            placeholder="e.g. Columbia"
-            className="field-input w-full"
-          />
-        </Section>
-      )}
-
-      {/* How we met */}
       {(editMode || person.howWeMet) && (
         <Section label="How we met">
           {editMode ? (
-            <textarea
-              value={eHowWeMet}
-              onChange={(e) => setEHowWeMet(e.target.value)}
-              rows={2}
-              className="field-input w-full resize-none"
-            />
+            <textarea value={eHowWeMet} onChange={(e) => setEHowWeMet(e.target.value)}
+              rows={2} className="field-input w-full resize-none" />
           ) : (
-            <p style={{ color: 'var(--text-secondary)' }} className="text-[12px] leading-relaxed">
-              {person.howWeMet}
-            </p>
+            <p style={{ color: 'var(--text-secondary)' }} className="text-[12px] leading-relaxed">{person.howWeMet}</p>
           )}
         </Section>
       )}
 
-      {/* Backlinks */}
-      {(!editMode && (person.backlinks ?? []).length > 0) && (
+      {!editMode && (person.backlinks ?? []).length > 0 && (
         <Section label="Links">
           <div className="flex flex-wrap gap-2">
             {(person.backlinks ?? []).map((b) => (
-              <a
-                key={b.label}
-                href={b.url}
-                target="_blank"
-                rel="noopener noreferrer"
+              <a key={b.label} href={b.url} target="_blank" rel="noopener noreferrer"
                 style={{ borderColor: 'var(--border)', color: 'var(--text-primary)', backgroundColor: 'var(--bg)' }}
-                className="text-[11px] border rounded-md px-2.5 py-1 hover:opacity-70 transition-opacity"
-              >
+                className="text-[11px] border rounded-md px-2.5 py-1 hover:opacity-70 transition-opacity">
                 {b.label} ↗
               </a>
             ))}
@@ -517,39 +488,22 @@ function PersonPanel({ id, onClose, onDeleted }: { id: string; onClose: () => vo
           <div className="space-y-2">
             {eBacklinks.map((b, i) => (
               <div key={i} className="flex gap-2 items-center">
-                <input
-                  type="text"
-                  value={b.label}
-                  onChange={(e) => updateBL(i, { label: e.target.value })}
-                  placeholder="Label"
-                  className="field-input w-24"
-                />
-                <input
-                  type="url"
-                  value={b.url}
-                  onChange={(e) => updateBL(i, { url: e.target.value })}
-                  placeholder="https://…"
-                  className="field-input flex-1"
-                />
-                <button
-                  onClick={() => setEBacklinks((bl) => bl.filter((_, idx) => idx !== i))}
-                  style={{ color: 'var(--text-secondary)' }}
-                  className="text-[14px]"
-                >×</button>
+                <input type="text" value={b.label} onChange={(e) => updateBL(i, { label: e.target.value })}
+                  placeholder="Label" className="field-input w-24" />
+                <input type="url" value={b.url} onChange={(e) => updateBL(i, { url: e.target.value })}
+                  placeholder="https://…" className="field-input flex-1" />
+                <button onClick={() => setEBacklinks((bl) => bl.filter((_, idx) => idx !== i))}
+                  style={{ color: 'var(--text-secondary)' }} className="text-[14px]">×</button>
               </div>
             ))}
-            <button
-              onClick={() => setEBacklinks((bl) => [...bl, { label: '', url: '' }])}
-              style={{ color: 'var(--text-secondary)' }}
-              className="text-[11px] hover:opacity-70"
-            >
+            <button onClick={() => setEBacklinks((bl) => [...bl, { label: '', url: '' }])}
+              style={{ color: 'var(--text-secondary)' }} className="text-[11px] hover:opacity-70">
               + Add link
             </button>
           </div>
         </Section>
       )}
 
-      {/* Connections */}
       <Section label={`Connections (${connections.length})`}>
         <div className="space-y-1.5">
           {connections.length === 0 ? (
@@ -558,23 +512,15 @@ function PersonPanel({ id, onClose, onDeleted }: { id: string; onClose: () => vo
             connections.map((conn) => {
               const company = data.companies.find((c) => c.id === conn.companyId)
               return (
-                <ConnectionRow
-                  key={conn.id}
-                  label={company?.name ?? 'Unknown'}
-                  sublabel={conn.relationship}
-                  onDelete={() => deleteConnection(conn.id)}
-                  editMode={editMode}
-                />
+                <ConnectionRow key={conn.id} label={company?.name ?? 'Unknown'} sublabel={conn.relationship}
+                  onDelete={() => deleteConnection(conn.id)} editMode={editMode} />
               )
             })
           )}
         </div>
         {!editMode && (
-          <button
-            onClick={() => setShowAddConn(true)}
-            style={{ color: 'var(--text-secondary)' }}
-            className="text-[11px] mt-2 hover:opacity-70"
-          >
+          <button onClick={() => setShowAddConn(true)} style={{ color: 'var(--text-secondary)' }}
+            className="text-[11px] mt-2 hover:opacity-70">
             + Add connection
           </button>
         )}
@@ -583,7 +529,7 @@ function PersonPanel({ id, onClose, onDeleted }: { id: string; onClose: () => vo
       {editMode && (
         <div className="flex gap-2 pt-1">
           <button onClick={saveEdit} className="btn-primary text-[12px]">Save</button>
-          <button onClick={cancelEdit} className="btn-ghost text-[12px]">Cancel</button>
+          <button onClick={() => setEditMode(false)} className="btn-ghost text-[12px]">Cancel</button>
         </div>
       )}
 
@@ -594,10 +540,7 @@ function PersonPanel({ id, onClose, onDeleted }: { id: string; onClose: () => vo
           onCancel={() => setShowDelete(false)}
         />
       )}
-
-      {showAddConn && (
-        <AddConnectionModal forPersonId={id} onClose={() => setShowAddConn(false)} />
-      )}
+      {showAddConn && <AddConnectionModal forPersonId={id} onClose={() => setShowAddConn(false)} />}
     </Shell>
   )
 }
@@ -607,10 +550,8 @@ function PersonPanel({ id, onClose, onDeleted }: { id: string; onClose: () => vo
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <span
-        style={{ color: 'var(--text-secondary)' }}
-        className="text-[9px] uppercase tracking-widest font-medium block mb-1.5"
-      >
+      <span style={{ color: 'var(--text-secondary)' }}
+        className="text-[9px] uppercase tracking-widest font-medium block mb-1.5">
         {label}
       </span>
       {children}
@@ -621,22 +562,16 @@ function Section({ label, children }: { label: string; children: React.ReactNode
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex gap-2">
-      <span style={{ color: 'var(--text-secondary)' }} className="text-[11px] w-20 shrink-0">
-        {label}
-      </span>
-      <span style={{ color: 'var(--text-primary)' }} className="text-[11px]">
-        {value}
-      </span>
+      <span style={{ color: 'var(--text-secondary)' }} className="text-[11px] w-20 shrink-0">{label}</span>
+      <span style={{ color: 'var(--text-primary)' }} className="text-[11px]">{value}</span>
     </div>
   )
 }
 
 function Tag({ label }: { label: string }) {
   return (
-    <span
-      style={{ backgroundColor: 'var(--border)', color: 'var(--text-secondary)', fontSize: '9px' }}
-      className="rounded px-1.5 py-0.5 font-medium uppercase tracking-wide"
-    >
+    <span style={{ backgroundColor: 'var(--border)', color: 'var(--text-secondary)', fontSize: '9px' }}
+      className="rounded px-1.5 py-0.5 font-medium uppercase tracking-wide">
       {label}
     </span>
   )
@@ -658,49 +593,24 @@ function TierBadge({ tier }: { tier: 'S' | 'A' }) {
 }
 
 function Empty({ children }: { children: React.ReactNode }) {
-  return (
-    <p style={{ color: 'var(--text-secondary)' }} className="text-[11px] italic">
-      {children}
-    </p>
-  )
+  return <p style={{ color: 'var(--text-secondary)' }} className="text-[11px] italic">{children}</p>
 }
 
 function ConnectionRow({
-  label,
-  sublabel,
-  onDelete,
-  editMode,
+  label, sublabel, onDelete, editMode,
 }: {
-  label: string
-  sublabel: string
-  onDelete: () => void
-  editMode: boolean
+  label: string; sublabel: string; onDelete: () => void; editMode: boolean
 }) {
   return (
-    <div
-      style={{ borderColor: 'var(--border)' }}
-      className="border rounded-lg px-3 py-2 flex items-start justify-between gap-2"
-    >
+    <div style={{ borderColor: 'var(--border)' }} className="border rounded-lg px-3 py-2 flex items-start justify-between gap-2">
       <div className="min-w-0">
-        <div style={{ color: 'var(--text-primary)' }} className="text-[12px] font-medium truncate">
-          {label}
-        </div>
-        <div style={{ color: 'var(--text-secondary)' }} className="text-[10px] leading-snug mt-0.5">
-          {sublabel}
-        </div>
+        <div style={{ color: 'var(--text-primary)' }} className="text-[12px] font-medium truncate">{label}</div>
+        <div style={{ color: 'var(--text-secondary)' }} className="text-[10px] leading-snug mt-0.5">{sublabel}</div>
       </div>
       {editMode && (
-        <button
-          onClick={onDelete}
-          style={{ color: 'var(--text-secondary)' }}
-          className="text-[13px] shrink-0 hover:opacity-70 mt-0.5"
-        >
-          ×
-        </button>
+        <button onClick={onDelete} style={{ color: 'var(--text-secondary)' }}
+          className="text-[13px] shrink-0 hover:opacity-70 mt-0.5">×</button>
       )}
     </div>
   )
 }
-
-// Re-export types for Graph.tsx
-export type { Selection as SidePanelSelection }
