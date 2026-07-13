@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --sidebar-width: 240px;
+    --sidebar-collapsed: 64px;
+    --topbar-height: 56px;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply bg-neutral-50 text-neutral-900 font-sans;
+  }
+
+  .dark body {
+    @apply bg-obsidian text-neutral-100;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-neutral-300 rounded-full;
+  }
+  .dark ::-webkit-scrollbar-thumb {
+    @apply bg-neutral-700;
+  }
+}
+
+@layer utilities {
+  .sidebar-transition {
+    transition: width 150ms ease-out;
+  }
+}
