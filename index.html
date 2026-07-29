@@ -221,10 +221,17 @@
       opacity: 1;
       filter: none;
     }
-    /* Shopify monochrome bag: invert on dark so it reads as light ink */
+    /* Shopify monochrome bag: slightly larger (asset has padding) + invert on dark */
+    .company-logos a[aria-label="Shopify"] {
+      margin-right: -4px;
+    }
     .company-logos a[aria-label="Shopify"] img {
+      height: 28px;
+      width: 28px;
+      max-width: none;
       opacity: 0.72;
       filter: invert(1);
+      transform: translateX(3px);
     }
     .company-logos a[aria-label="Shopify"]:hover img,
     .company-logos a[aria-label="Shopify"]:focus-visible img {
@@ -681,7 +688,7 @@
       <div class="hero-aside">
         <div class="company-logos" aria-label="Places I've worked">
           <a href="https://www.shopify.com" target="_blank" rel="noopener noreferrer" aria-label="Shopify">
-            <img src="assets/logos/shopify.png" alt="Shopify" height="22" width="22"/>
+            <img src="assets/logos/shopify.png" alt="Shopify" height="28" width="28"/>
           </a>
           <a href="https://cetsandbox.com/" target="_blank" rel="noopener noreferrer" aria-label="CET Sandbox">
             <img src="assets/logos/cet-sandbox.png" alt="CET Sandbox" height="22" width="28"/>
@@ -715,7 +722,7 @@
           <div class="card-visual"><span class="card-visual-text">SG</span></div>
           <div class="card-body">
             <div class="card-title">Signal</div>
-            <div class="card-sub">Signal is an intelligence platform for competitor analysis.</div>
+            <div class="card-sub">Automated intelligence platform for competitor analysis</div>
           </div>
           <div class="card-actions">
             <button type="button" class="card-btn disabled">View Project ↗</button>
