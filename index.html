@@ -170,6 +170,26 @@
       gap: 18px 22px;
       max-width: 280px;
     }
+    .hero-aside {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 14px;
+    }
+    .hero-meta {
+      text-align: right;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      line-height: 2.2;
+    }
+    .hero-linkedin {
+      color: var(--ink-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .hero-linkedin:hover { color: var(--ink); }
     .company-logos a {
       display: inline-flex;
       align-items: center;
@@ -198,6 +218,25 @@
     }
     html[data-theme="light"] .company-logos a:hover img,
     html[data-theme="light"] .company-logos a:focus-visible img {
+      opacity: 1;
+      filter: none;
+    }
+    /* Shopify monochrome bag: invert on dark so it reads as light ink */
+    .company-logos a[aria-label="Shopify"] img {
+      opacity: 0.72;
+      filter: invert(1);
+    }
+    .company-logos a[aria-label="Shopify"]:hover img,
+    .company-logos a[aria-label="Shopify"]:focus-visible img {
+      opacity: 1;
+      filter: invert(1);
+    }
+    html[data-theme="light"] .company-logos a[aria-label="Shopify"] img {
+      opacity: 0.5;
+      filter: none;
+    }
+    html[data-theme="light"] .company-logos a[aria-label="Shopify"]:hover img,
+    html[data-theme="light"] .company-logos a[aria-label="Shopify"]:focus-visible img {
       opacity: 1;
       filter: none;
     }
@@ -595,6 +634,8 @@
       .wrap, .wrap-mid { padding: 0 20px; }
       .hero h1 { font-size: 2.8rem; }
       .hero-foot { flex-direction: column; gap: 20px; }
+      .hero-aside { align-items: flex-start; }
+      .hero-meta { text-align: left; }
       .company-logos { justify-content: flex-start; max-width: none; }
       .project-row { grid-template-columns: 1fr; }
       .about-inner { grid-template-columns: 1fr; gap: 40px; }
@@ -637,19 +678,22 @@
       <p class="hero-bio">
         I'm a Columbia University Dual Degree student pursuing a BA in CS and a BA in History. I'm currently interning at Shopify in Research & Development, working on agentic AI to surface the user insights. I blend developer ability with care for context.
       </p>
-      <div class="company-logos" aria-label="Places I've worked and studied">
-        <a href="https://www.shopify.com" target="_blank" rel="noopener noreferrer" aria-label="Shopify">
-          <img src="assets/logos/shopify.png" alt="Shopify" height="22" width="22"/>
-        </a>
-        <a href="https://cetsandbox.com/" target="_blank" rel="noopener noreferrer" aria-label="CET Sandbox">
-          <img src="assets/logos/cet-sandbox.png" alt="CET Sandbox" height="22" width="28"/>
-        </a>
-        <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
-          <img src="assets/logos/tiktok.png" alt="TikTok" height="22" width="19"/>
-        </a>
-        <a href="https://www.columbia.edu" target="_blank" rel="noopener noreferrer" aria-label="Columbia University">
-          <img src="assets/logos/columbia.png" alt="Columbia University" height="22" width="25"/>
-        </a>
+      <div class="hero-aside">
+        <div class="company-logos" aria-label="Places I've worked">
+          <a href="https://www.shopify.com" target="_blank" rel="noopener noreferrer" aria-label="Shopify">
+            <img src="assets/logos/shopify.png" alt="Shopify" height="22" width="22"/>
+          </a>
+          <a href="https://cetsandbox.com/" target="_blank" rel="noopener noreferrer" aria-label="CET Sandbox">
+            <img src="assets/logos/cet-sandbox.png" alt="CET Sandbox" height="22" width="28"/>
+          </a>
+          <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+            <img src="assets/logos/tiktok.png" alt="TikTok" height="22" width="19"/>
+          </a>
+        </div>
+        <div class="hero-meta">
+          <div>New York, NY</div>
+          <a class="hero-linkedin" href="https://www.linkedin.com/in/ariel-g-945081217/" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
+        </div>
       </div>
     </div>
   </section>
