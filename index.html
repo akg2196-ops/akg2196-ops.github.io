@@ -164,11 +164,10 @@
 
     .company-logos {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       align-items: center;
       justify-content: flex-end;
-      gap: 18px 22px;
-      max-width: 280px;
+      gap: 20px;
     }
     .hero-aside {
       display: flex;
@@ -194,13 +193,15 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      width: 24px;
+      height: 24px;
+      flex: 0 0 24px;
       line-height: 0;
       text-decoration: none;
     }
     .company-logos img {
-      height: 22px;
-      width: auto;
-      max-width: 72px;
+      width: 24px;
+      height: 24px;
       object-fit: contain;
       display: block;
       opacity: 0.72;
@@ -221,31 +222,22 @@
       opacity: 1;
       filter: none;
     }
-    /* Shopify monochrome bag: slightly larger (asset has padding) + invert on dark */
-    .company-logos a[aria-label="Shopify"] {
-      margin-right: -4px;
-    }
+    /* Shopify is already monochrome — invert on dark so it reads as light ink */
     .company-logos a[aria-label="Shopify"] img {
-      height: 28px;
-      width: 28px;
-      max-width: none;
-      opacity: 0.72;
       filter: invert(1);
-      transform: translateX(3px);
     }
     .company-logos a[aria-label="Shopify"]:hover img,
     .company-logos a[aria-label="Shopify"]:focus-visible img {
-      opacity: 1;
       filter: invert(1);
+      opacity: 1;
     }
     html[data-theme="light"] .company-logos a[aria-label="Shopify"] img {
-      opacity: 0.5;
       filter: none;
     }
     html[data-theme="light"] .company-logos a[aria-label="Shopify"]:hover img,
     html[data-theme="light"] .company-logos a[aria-label="Shopify"]:focus-visible img {
-      opacity: 1;
       filter: none;
+      opacity: 1;
     }
 
     /* ── WORKS ── */
@@ -364,6 +356,13 @@
     .card-sub {
       font-size: 0.8rem;
       color: var(--ink-mid);
+      line-height: 1.5;
+    }
+    .card-stack {
+      margin-top: 10px;
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+      color: var(--ink-dim);
       line-height: 1.5;
     }
 
@@ -683,18 +682,18 @@
     <h1>I build products to solve problems wherever I find them.</h1>
     <div class="hero-foot">
       <p class="hero-bio">
-        I'm a Columbia University Dual Degree student pursuing a BA in CS and a BA in History. I'm currently interning at Shopify in Research & Development, working on agentic AI to surface the user insights. I blend developer ability with care for context.
+        I'm a Columbia University Dual Degree student pursuing a BA in CS and a BA in History. I'm currently interning at Shopify in Research & Development, working on agentic AI to surface user insights. I blend developer ability with care for context.
       </p>
       <div class="hero-aside">
         <div class="company-logos" aria-label="Places I've worked">
           <a href="https://www.shopify.com" target="_blank" rel="noopener noreferrer" aria-label="Shopify">
-            <img src="assets/logos/shopify.png" alt="Shopify" height="28" width="28"/>
+            <img src="assets/logos/shopify.png" alt="Shopify" height="24" width="24"/>
           </a>
           <a href="https://cetsandbox.com/" target="_blank" rel="noopener noreferrer" aria-label="CET Sandbox">
-            <img src="assets/logos/cet-sandbox.png" alt="CET Sandbox" height="22" width="28"/>
+            <img src="assets/logos/cet-sandbox.png" alt="CET Sandbox" height="24" width="24"/>
           </a>
           <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
-            <img src="assets/logos/tiktok.png" alt="TikTok" height="22" width="19"/>
+            <img src="assets/logos/tiktok.png" alt="TikTok" height="24" width="24"/>
           </a>
         </div>
         <div class="hero-meta">
@@ -723,6 +722,7 @@
           <div class="card-body">
             <div class="card-title">Signal</div>
             <div class="card-sub">Automated intelligence platform for competitor analysis</div>
+            <div class="card-stack">Python · Next.js · TypeScript · Supabase · Claude · Beautiful Soup</div>
           </div>
           <div class="card-actions">
             <button type="button" class="card-btn disabled">View Project ↗</button>
@@ -739,6 +739,7 @@
           <div class="card-body">
             <div class="card-title">Course Vault</div>
             <div class="card-sub">Personalized AI learning from your own course material</div>
+            <div class="card-stack">Next.js · TypeScript · Prisma · PostgreSQL · Claude · Tailwind</div>
           </div>
           <div class="card-actions">
             <a class="card-btn" href="https://course-vault-tau.vercel.app" target="_blank">View Project ↗</a>
@@ -814,6 +815,24 @@
     <!-- Row 2 -->
     <div class="project-row">
 
+      <!-- CET Sandbox — NOT SHAREABLE -->
+      <div class="project-card-wrap is-locked">
+        <div class="project-card locked-card" data-nav-page="page-ns-cet">
+          <div class="badge locked-badge"><span class="badge-dot"></span> Not Shareable</div>
+          <div class="lock-overlay"></div>
+          <div class="card-visual"><span class="card-visual-text">CET</span></div>
+          <div class="card-body">
+            <div class="card-title">CET Sandbox GTM Bot</div>
+            <div class="card-sub">Internal RAG system for U.S. defense-tech commercialization</div>
+            <div class="card-stack">Python · Ollama · LlamaIndex · FAISS · Beautiful Soup · RAG</div>
+          </div>
+          <div class="card-actions">
+            <button class="card-btn disabled">View Project ↗</button>
+            <button type="button" class="card-btn" data-nav-page="page-ns-cet">Case Study →</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Tutor Tree -->
       <div class="project-card-wrap">
         <div class="project-card">
@@ -822,6 +841,7 @@
           <div class="card-body">
             <div class="card-title">Tutor Tree</div>
             <div class="card-sub">E-commerce marketplace for high school tutoring · $20K revenue</div>
+            <div class="card-stack">Stripe · Square · JotForm · Email automation · In-site messaging · Payment splitting</div>
           </div>
           <div class="card-actions">
             <!-- UPDATE href with live URL if it still exists, or remove/disable -->
@@ -893,23 +913,6 @@
         </div>
       </div>
 
-      <!-- CET Sandbox — NOT SHAREABLE -->
-      <div class="project-card-wrap is-locked">
-        <div class="project-card locked-card" data-nav-page="page-ns-cet">
-          <div class="badge locked-badge"><span class="badge-dot"></span> Not Shareable</div>
-          <div class="lock-overlay"></div>
-          <div class="card-visual"><span class="card-visual-text">CET</span></div>
-          <div class="card-body">
-            <div class="card-title">CET Sandbox GTM Bot</div>
-            <div class="card-sub">Internal RAG system for U.S. defense-tech commercialization</div>
-          </div>
-          <div class="card-actions">
-            <button class="card-btn disabled">View Project ↗</button>
-            <button type="button" class="card-btn" data-nav-page="page-ns-cet">Case Study →</button>
-          </div>
-        </div>
-      </div>
-
     </div><!-- /row 2 -->
 
     <!-- Row 3 — TikTok (half width) -->
@@ -924,6 +927,7 @@
           <div class="card-body">
             <div class="card-title">TikTok Search Product</div>
             <div class="card-sub">Original search product research, currently in TikTok's deal pipeline</div>
+            <div class="card-stack">Google Trends · Internal analytics · Canva · Product research · User segmentation · Partnership strategy</div>
           </div>
           <div class="card-actions">
             <button class="card-btn disabled">View Project ↗</button>
