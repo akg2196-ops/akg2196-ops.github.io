@@ -88,6 +88,9 @@
       border: none;
       cursor: pointer;
       transition: color 0.2s;
+      display: inline-flex;
+      align-items: center;
+      min-height: 1.2em;
     }
     .nav-name:hover { color: var(--ink-mid); }
     .nav-right { display: flex; gap: 32px; align-items: center; }
@@ -117,7 +120,7 @@
       background: var(--surface);
       color: var(--ink-mid);
       cursor: pointer;
-      transition: color 0.2s, background 0.2s, border-color 0.2s;
+      transition: color 0.2s, background 0.2s, border-color 0.2s, opacity 0.45s ease, transform 0.45s ease;
     }
     .theme-toggle:hover {
       color: var(--ink);
@@ -132,15 +135,338 @@
     html[data-theme="light"] .theme-toggle .icon-moon { display: none; }
     html[data-theme="light"] .theme-toggle .icon-sun { display: block; }
 
+    .theme-toggle-wrap {
+      position: relative;
+      width: 28px;
+      height: 28px;
+      flex: 0 0 28px;
+    }
+    .sun-doodle {
+      position: absolute;
+      inset: -2px;
+      width: 32px;
+      height: 32px;
+      color: var(--ink-mid);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .sun-doodle.is-drawing { opacity: 1; }
+    .sun-doodle.is-dissolving {
+      opacity: 0;
+      transform: scale(0.85);
+      filter: blur(2px);
+      transition: opacity 0.45s ease, transform 0.45s ease, filter 0.45s ease;
+    }
+    .sun-doodle.is-gone { display: none; }
+    .sun-doodle .sun-circle,
+    .sun-doodle .sun-ray {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.35;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    #page-home.intro-running .theme-toggle {
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.85);
+      pointer-events: none;
+    }
+    #page-home.intro-running.theme-ready .theme-toggle,
+    #page-home.intro-done .theme-toggle {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      pointer-events: auto;
+    }
+
+    /* ── TYPEWRITER INTRO ── */
+    .caret {
+      display: inline-block;
+      width: 0.08em;
+      min-width: 2px;
+      height: 1em;
+      margin-left: 2px;
+      background: var(--ink);
+      vertical-align: -0.08em;
+      animation: caretBlink 1s steps(1) infinite;
+      transition: font-size 0.55s ease, height 0.55s ease, width 0.55s ease, min-width 0.55s ease;
+    }
+    .caret.is-hidden { display: none; }
+    .caret.is-large {
+      height: 0.9em;
+      width: 0.06em;
+      min-width: 3px;
+      vertical-align: -0.05em;
+      transition: height 0.55s ease, width 0.55s ease, min-width 0.55s ease, font-size 0.55s ease;
+    }
+    .caret.is-shrinking {
+      height: 1em;
+      width: 0.08em;
+      min-width: 2px;
+    }
+    @keyframes caretBlink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+    .type-highlight {
+      background: rgba(61, 122, 90, 0.28);
+      border-radius: 2px;
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
+    }
+    html[data-theme="light"] .type-highlight {
+      background: rgba(61, 122, 90, 0.22);
+    }
+    #page-home.intro-running .aside-real,
+    #page-home.intro-running .works-header,
+    #page-home.intro-running .project-list,
+    #page-home.intro-running .about-section,
+    #page-home.intro-running footer {
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+    }
+    #page-home.intro-running.show-aside-box .aside-stage {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: none;
+    }
+    #page-home.intro-running.show-aside-real .aside-real {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+    #page-home.intro-running.show-works-stage .works-header,
+    #page-home.intro-running.show-works-stage .project-list {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+    #page-home.intro-done .about-section,
+    #page-home.intro-done footer {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      animation: fadeIn 0.7s ease both;
+    }
+    #page-home.intro-done .aside-stage {
+      display: none;
+    }
+    .aside-stage {
+      position: absolute;
+      inset: -14px -4px -14px -20px;
+      opacity: 0;
+      visibility: hidden;
+      z-index: 3;
+      overflow: visible;
+    }
+    /* Google Sheets Drawing: crosshair while creating a text box */
+    .sheets-cursor {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      margin: -9px 0 0 -9px;
+      background: transparent;
+      box-sizing: border-box;
+      opacity: 0;
+      transform: scale(0.7);
+      z-index: 6;
+      pointer-events: none;
+    }
+    .sheets-cursor::before,
+    .sheets-cursor::after {
+      content: '';
+      position: absolute;
+      background: var(--ink);
+      border-radius: 0.5px;
+    }
+    .sheets-cursor::before {
+      left: 50%;
+      top: 0;
+      width: 1.5px;
+      height: 100%;
+      transform: translateX(-50%);
+    }
+    .sheets-cursor::after {
+      top: 50%;
+      left: 0;
+      height: 1.5px;
+      width: 100%;
+      transform: translateY(-50%);
+    }
+    .sheets-cursor.is-visible {
+      opacity: 1;
+      transform: scale(1);
+      transition: opacity 0.28s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), left 0.95s cubic-bezier(0.4, 0, 0.2, 1), top 0.95s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .sheets-cursor.is-clicking {
+      transform: scale(0.88);
+      transition: transform 0.1s ease;
+    }
+    .sheets-cursor.is-gone {
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    /* Floating Drawing text box — transparent fill, thin border, blue selection chrome */
+    .aside-textbox {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 0;
+      height: 0;
+      overflow: visible;
+      border: 1px solid var(--ink);
+      background: transparent;
+      border-radius: 0;
+      box-sizing: border-box;
+      font-size: 0.9rem;
+      font-weight: 300;
+      line-height: 1.55;
+      color: var(--ink-mid);
+      text-align: left;
+      opacity: 0;
+      z-index: 4;
+    }
+    .aside-textbox-inner {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      box-sizing: border-box;
+      padding: 10px 12px;
+      white-space: normal;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+    }
+    .aside-textbox.is-drawing {
+      opacity: 1;
+      transition: width 1.05s cubic-bezier(0.4, 0, 0.2, 1), height 1.05s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.12s ease;
+    }
+    .aside-textbox.is-selected,
+    .aside-textbox.is-editing {
+      border-color: #1a73e8;
+      box-shadow: 0 0 0 1px #1a73e8;
+    }
+    .aside-textbox.is-exiting {
+      opacity: 0;
+      filter: blur(2px);
+      transform: scale(0.985);
+      transition: opacity 0.4s ease, filter 0.4s ease, transform 0.4s ease;
+    }
+    .sheets-handle {
+      position: absolute;
+      width: 7px;
+      height: 7px;
+      background: #fff;
+      border: 1.5px solid #1a73e8;
+      box-sizing: border-box;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .aside-textbox.is-selected .sheets-handle,
+    .aside-textbox.is-editing .sheets-handle {
+      opacity: 1;
+    }
+    .sheets-handle[data-pos="nw"] { left: -4px; top: -4px; }
+    .sheets-handle[data-pos="n"]  { left: 50%; top: -4px; margin-left: -3.5px; }
+    .sheets-handle[data-pos="ne"] { right: -4px; top: -4px; }
+    .sheets-handle[data-pos="e"]  { right: -4px; top: 50%; margin-top: -3.5px; }
+    .sheets-handle[data-pos="se"] { right: -4px; bottom: -4px; }
+    .sheets-handle[data-pos="s"]  { left: 50%; bottom: -4px; margin-left: -3.5px; }
+    .sheets-handle[data-pos="sw"] { left: -4px; bottom: -4px; }
+    .sheets-handle[data-pos="w"]  { left: -4px; top: 50%; margin-top: -3.5px; }
+    .aside-typed {
+      display: none;
+      color: var(--ink-mid);
+      font-weight: 400;
+    }
+    .aside-textbox.is-typing .aside-typed {
+      display: inline;
+    }
+    .aside-textbox .caret {
+      background: var(--ink);
+      vertical-align: -0.1em;
+    }
+    .aside-real {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 14px;
+      position: relative;
+      z-index: 1;
+    }
+    .aside-real.is-revealing .company-logos a,
+    .aside-real.is-revealing .hero-meta > * {
+      animation: asidePop 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .aside-real.is-revealing .company-logos a:nth-child(1) { animation-delay: 0ms; }
+    .aside-real.is-revealing .company-logos a:nth-child(2) { animation-delay: 90ms; }
+    .aside-real.is-revealing .company-logos a:nth-child(3) { animation-delay: 180ms; }
+    .aside-real.is-revealing .hero-meta > *:nth-child(1) { animation-delay: 260ms; }
+    .aside-real.is-revealing .hero-meta > *:nth-child(2) { animation-delay: 340ms; }
+    @keyframes asidePop {
+      from { opacity: 0; transform: translateY(14px) scale(0.92); filter: blur(3px); }
+      to   { opacity: 1; transform: none; filter: none; }
+    }
+    .works-range.is-hidden { opacity: 0; visibility: hidden; }
+    .works-range {
+      display: inline-flex;
+      align-items: center;
+      min-height: 1em;
+    }
+    .project-card-wrap.rise-wait {
+      opacity: 0;
+      transform: translateY(72px);
+    }
+    .project-card-wrap.rise-in {
+      opacity: 1;
+      transform: none;
+      transition: opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1), transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .caret { animation: none; opacity: 1; }
+      #page-home.intro-running .aside-real,
+      #page-home.intro-running .works-header,
+      #page-home.intro-running .project-list,
+      #page-home.intro-running .about-section,
+      #page-home.intro-running footer,
+      #page-home.intro-running .theme-toggle {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transform: none;
+      }
+      .aside-stage { display: none; }
+      .sun-doodle { display: none; }
+      .project-card-wrap.rise-wait,
+      .project-card-wrap.rise-in {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+    }
+    .nav-type-slot {
+      display: inline-flex;
+      align-items: center;
+      min-height: 1em;
+    }
+    .nav-name .type-line,
+    .hero h1 .type-line,
+    .hero-bio .type-line,
+    .works-title .type-line {
+      display: inline;
+    }
+
     /* ── HERO ── */
     .hero {
       padding: 72px 0 80px;
-      border-bottom: 1px solid var(--border);
-      animation: fadeIn 0.8s ease both;
+      border-bottom: none;
     }
     .hero h1 {
       font-family: var(--serif);
-      font-size: clamp(3.2rem, 7vw, 6.4rem);
+      font-size: clamp(calc(3.2rem - 8pt), calc(7vw - 8pt), calc(6.4rem - 8pt));
       font-weight: 400;
       line-height: 1.05;
       letter-spacing: -0.02em;
@@ -162,6 +488,64 @@
       font-weight: 300;
     }
 
+    .hero-rule {
+      position: relative;
+      height: 14px;
+      margin: -7px 0 -6px;
+      pointer-events: none;
+    }
+    .hero-rule-line {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      height: 1px;
+      width: 0%;
+      background: var(--border);
+      transform: translateY(-50%);
+      transform-origin: left center;
+    }
+    .hero-rule-knob {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 1.5px solid var(--ink-dim);
+      background: var(--bg);
+      box-sizing: border-box;
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
+      z-index: 1;
+    }
+    .hero-rule.is-primed .hero-rule-knob {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+      transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .hero-rule.is-dragging .hero-rule-line {
+      width: 100%;
+      transition: width 1.45s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+    .hero-rule.is-dragging .hero-rule-knob {
+      left: 100%;
+      transition: left 1.45s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+    .hero-rule.is-settled .hero-rule-line {
+      width: 100%;
+      transition: none;
+    }
+    .hero-rule.is-settled .hero-rule-knob {
+      left: 100%;
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.4);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hero-rule-line { width: 100% !important; transition: none !important; }
+      .hero-rule-knob { display: none !important; }
+    }
+
     .company-logos {
       display: flex;
       flex-wrap: nowrap;
@@ -170,10 +554,13 @@
       gap: 20px;
     }
     .hero-aside {
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: flex-end;
       gap: 14px;
+      min-width: 168px;
+      min-height: 72px;
     }
     .hero-meta {
       text-align: right;
@@ -638,7 +1025,7 @@
 
     @media (max-width: 700px) {
       .wrap, .wrap-mid { padding: 0 20px; }
-      .hero h1 { font-size: 2.8rem; }
+      .hero h1 { font-size: calc(2.8rem - 8pt); }
       .hero-foot { flex-direction: column; gap: 20px; }
       .hero-aside { align-items: flex-start; }
       .hero-meta { text-align: left; }
@@ -658,55 +1045,106 @@
 <body>
 
 <!-- ═══════════════ HOME ═══════════════ -->
-<div class="page active" id="page-home">
+<div class="page active intro-running" id="page-home">
 <div class="wrap">
 
   <nav>
-    <button type="button" class="nav-name" data-nav-page="page-home">Ariel Greenblatt</button>
+    <button type="button" class="nav-name" data-nav-page="page-home" aria-label="Ariel Greenblatt">
+      <span class="type-line" id="type-name"></span><span class="caret" id="caret-name" aria-hidden="true"></span>
+    </button>
     <div class="nav-right">
-      <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle light mode" title="Toggle theme">
-        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <path d="M21 14.5A8.5 8.5 0 0 1 9.5 3 7 7 0 1 0 21 14.5z"/>
+      <div class="theme-toggle-wrap" id="theme-toggle-wrap">
+        <svg class="sun-doodle" id="sun-doodle" viewBox="0 0 28 28" aria-hidden="true">
+          <!-- Slightly uneven, off-center circle -->
+          <path class="sun-circle" d="M15.4 6.8
+            C19.2 6.2 22.1 8.9 21.6 12.7
+            C21.2 16.4 17.9 19.6 13.8 19.0
+            C9.4 18.3 6.9 14.6 7.7 10.9
+            C8.4 7.6 11.8 7.3 15.4 6.8Z"/>
+          <!-- 5 uneven rays -->
+          <path class="sun-ray" d="M14.2 4.2 L14.6 2.3"/>
+          <path class="sun-ray" d="M20.8 7.4 L22.4 6.1"/>
+          <path class="sun-ray" d="M22.3 15.2 L24.1 15.8"/>
+          <path class="sun-ray" d="M16.1 21.2 L16.7 23.0"/>
+          <path class="sun-ray" d="M8.2 16.8 L6.5 17.6"/>
         </svg>
-        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <circle cx="12" cy="12" r="4"/>
-          <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
-        </svg>
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle light mode" title="Toggle theme">
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+            <path d="M21 14.5A8.5 8.5 0 0 1 9.5 3 7 7 0 1 0 21 14.5z"/>
+          </svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+          </svg>
+        </button>
+      </div>
+      <button type="button" class="nav-type-slot" data-nav-about="1" id="nav-about-btn" aria-label="About">
+        <span id="type-about"></span><span class="caret is-hidden" id="caret-about" aria-hidden="true"></span>
       </button>
-      <button type="button" data-nav-about="1">About</button>
-      <a href="mailto:akg2196@columbia.edu">Contact</a>
+      <a class="nav-type-slot" href="mailto:akg2196@columbia.edu" id="nav-contact-link" aria-label="Contact">
+        <span id="type-contact"></span><span class="caret is-hidden" id="caret-contact" aria-hidden="true"></span>
+      </a>
     </div>
   </nav>
 
   <section class="hero">
-    <h1>I build products to solve problems wherever I find them.</h1>
+    <h1 aria-label="I build products to solve problems wherever I find them.">
+      <span class="type-line" id="type-headline"></span><span class="caret is-hidden" id="caret-headline" aria-hidden="true"></span>
+    </h1>
     <div class="hero-foot">
-      <p class="hero-bio">
-        I'm a Columbia University Dual Degree student pursuing a BA in CS and a BA in History. I'm currently interning at Shopify in Research & Development, working on agentic AI to surface user insights. I blend developer ability with care for context.
+      <p class="hero-bio" aria-label="Columbia University Dual Degree student bio">
+        <span class="type-line" id="type-bio"></span><span class="caret is-hidden is-large" id="caret-bio" aria-hidden="true"></span>
       </p>
-      <div class="hero-aside">
-        <div class="company-logos" aria-label="Places I've worked">
-          <a href="https://www.shopify.com" target="_blank" rel="noopener noreferrer" aria-label="Shopify">
-            <img src="assets/logos/shopify.png" alt="Shopify" height="24" width="24"/>
-          </a>
-          <a href="https://cetsandbox.com/" target="_blank" rel="noopener noreferrer" aria-label="CET Sandbox">
-            <img src="assets/logos/cet-sandbox.png" alt="CET Sandbox" height="24" width="24"/>
-          </a>
-          <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
-            <img src="assets/logos/tiktok.png" alt="TikTok" height="24" width="24"/>
-          </a>
+      <div class="hero-aside" id="hero-aside">
+        <div class="aside-stage" id="aside-stage" aria-hidden="true">
+          <div class="sheets-cursor" id="sheets-cursor"></div>
+          <div class="aside-textbox" id="aside-textbox">
+            <span class="sheets-handle" data-pos="nw" aria-hidden="true"></span>
+            <span class="sheets-handle" data-pos="n" aria-hidden="true"></span>
+            <span class="sheets-handle" data-pos="ne" aria-hidden="true"></span>
+            <span class="sheets-handle" data-pos="e" aria-hidden="true"></span>
+            <span class="sheets-handle" data-pos="se" aria-hidden="true"></span>
+            <span class="sheets-handle" data-pos="s" aria-hidden="true"></span>
+            <span class="sheets-handle" data-pos="sw" aria-hidden="true"></span>
+            <span class="sheets-handle" data-pos="w" aria-hidden="true"></span>
+            <div class="aside-textbox-inner">
+              <span class="aside-typed" id="type-aside"></span><span class="caret is-hidden" id="caret-aside" aria-hidden="true"></span>
+            </div>
+          </div>
         </div>
-        <div class="hero-meta">
-          <div>New York, NY</div>
-          <a class="hero-linkedin" href="https://www.linkedin.com/in/ariel-g-945081217/" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
+        <div class="aside-real" id="aside-real">
+          <div class="company-logos" aria-label="Places I've worked">
+            <a href="https://www.shopify.com" target="_blank" rel="noopener noreferrer" aria-label="Shopify">
+              <img src="assets/logos/shopify.png" alt="Shopify" height="24" width="24"/>
+            </a>
+            <a href="https://cetsandbox.com/" target="_blank" rel="noopener noreferrer" aria-label="CET Sandbox">
+              <img src="assets/logos/cet-sandbox.png" alt="CET Sandbox" height="24" width="24"/>
+            </a>
+            <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+              <img src="assets/logos/tiktok.png" alt="TikTok" height="24" width="24"/>
+            </a>
+          </div>
+          <div class="hero-meta">
+            <div>New York, NY</div>
+            <a class="hero-linkedin" href="https://www.linkedin.com/in/ariel-g-945081217/" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <div class="works-header">
-    <span class="works-title">Selected works</span>
-    <span class="works-range">'23–'26</span>
+  <div class="hero-rule" id="hero-rule" aria-hidden="true">
+    <span class="hero-rule-line"></span>
+    <span class="hero-rule-knob"></span>
+  </div>
+
+  <div class="works-header" id="works-header">
+    <span class="works-title">
+      <span class="type-line" id="type-works"></span><span class="caret is-hidden" id="caret-works" aria-hidden="true"></span>
+    </span>
+    <span class="works-range is-hidden" id="works-range">
+      <span id="type-range"></span><span class="caret is-hidden" id="caret-range" aria-hidden="true"></span>
+    </span>
   </div>
 
   <div class="project-list">
@@ -715,7 +1153,7 @@
     <div class="project-row">
 
       <!-- Signal -->
-      <div class="project-card-wrap">
+      <div class="project-card-wrap rise-wait" data-rise="1">
         <div class="project-card">
           <div class="badge building"><span class="badge-dot"></span> In Progress</div>
           <div class="card-visual"><span class="card-visual-text">SG</span></div>
@@ -732,7 +1170,7 @@
       </div>
 
       <!-- Course Vault -->
-      <div class="project-card-wrap">
+      <div class="project-card-wrap rise-wait" data-rise="2">
         <div class="project-card">
           <div class="badge shipped"><span class="badge-dot"></span> Shipped</div>
           <div class="card-visual"><span class="card-visual-text">CV</span></div>
@@ -816,7 +1254,7 @@
     <div class="project-row">
 
       <!-- CET Sandbox — NOT SHAREABLE -->
-      <div class="project-card-wrap is-locked">
+      <div class="project-card-wrap is-locked rise-wait" data-rise="3">
         <div class="project-card locked-card" data-nav-page="page-ns-cet">
           <div class="badge locked-badge"><span class="badge-dot"></span> Not Shareable</div>
           <div class="lock-overlay"></div>
@@ -834,7 +1272,7 @@
       </div>
 
       <!-- Tutor Tree -->
-      <div class="project-card-wrap">
+      <div class="project-card-wrap rise-wait" data-rise="4">
         <div class="project-card">
           <div class="badge shipped"><span class="badge-dot"></span> Shipped</div>
           <div class="card-visual"><span class="card-visual-text">TT</span></div>
@@ -919,8 +1357,8 @@
     <div class="project-row">
 
       <!-- TikTok — NOT SHAREABLE -->
-      <div class="project-card-wrap is-locked">
-        <div class="project-card locked-card" style="min-height:200px;" data-nav-page="page-ns-tiktok">
+      <div class="project-card-wrap is-locked rise-wait" data-rise="5">
+        <div class="project-card locked-card" data-nav-page="page-ns-tiktok">
           <div class="badge locked-badge"><span class="badge-dot"></span> Not Shareable</div>
           <div class="lock-overlay"></div>
           <div class="card-visual"><span class="card-visual-text">TK</span></div>
@@ -1277,6 +1715,530 @@
 
 <script>
   (function () {
+    var reduceMotion = false;
+    try {
+      reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } catch (e) {}
+
+    var NAME_FULL = 'My name is Ariel Greenblatt.';
+    var NAME_KEEP = 'Ariel Greenblatt';
+    var NAME_DELETE = 'My name is ';
+    var HEADLINE = 'I build products to solve problems wherever I find them.';
+    var BIO_LEAD = "I'm a Columbia University Dual Degree student pursuing a BA in CS and a BA in History. I'm currently interning at Shopify in Product R&D, working on agentic AI to surface user insights for our entire company. ";
+    var BIO_BOLD = 'I blend developer ability with care for context.';
+    var BIO = BIO_LEAD + BIO_BOLD;
+    var ABOUT = 'About';
+    var CONTACT = 'Contact';
+    var ASIDE_PROMPT = 'Add logos + location + linkedin';
+    var WORKS_PROMPT = 'See my selected works below:';
+    var WORKS_FINAL = 'Selected works';
+    var WORKS_RANGE = "'23–'26";
+
+    // Baseline speeds (ms per character)
+    var SPEED = {
+      name: 70,
+      headline: 52,
+      nav: 85,
+      bio: 18,
+      aside: 55,
+      works: 48,
+      range: 70,
+      delete: 45
+    };
+
+    function wait(ms) {
+      return new Promise(function (resolve) { setTimeout(resolve, ms); });
+    }
+
+    function showCaret(el) {
+      if (!el) return;
+      el.classList.remove('is-hidden');
+    }
+
+    function hideCaret(el) {
+      if (!el) return;
+      el.classList.add('is-hidden');
+    }
+
+    function typeInto(target, caret, text, msPerChar) {
+      return new Promise(function (resolve) {
+        var i = 0;
+        target.textContent = '';
+        showCaret(caret);
+        function step() {
+          if (i >= text.length) {
+            resolve();
+            return;
+          }
+          target.textContent += text.charAt(i);
+          i += 1;
+          setTimeout(step, msPerChar);
+        }
+        step();
+      });
+    }
+
+    function typeIntoNode(node, caret, text, msPerChar) {
+      return new Promise(function (resolve) {
+        var i = 0;
+        showCaret(caret);
+        function step() {
+          if (i >= text.length) {
+            resolve();
+            return;
+          }
+          node.textContent += text.charAt(i);
+          i += 1;
+          setTimeout(step, msPerChar);
+        }
+        step();
+      });
+    }
+
+    function setBioFinal(bioEl) {
+      if (!bioEl) return;
+      bioEl.innerHTML = BIO_LEAD + '<strong style="font-weight:700;">' + BIO_BOLD + '</strong>';
+    }
+
+    function deleteChars(target, count, msPerChar) {
+      return new Promise(function (resolve) {
+        var left = count;
+        function step() {
+          if (left <= 0) {
+            resolve();
+            return;
+          }
+          var t = target.textContent || '';
+          target.textContent = t.slice(0, -1);
+          left -= 1;
+          setTimeout(step, msPerChar);
+        }
+        step();
+      });
+    }
+
+    function finishIntro() {
+      var home = document.getElementById('page-home');
+      if (!home) return;
+      home.classList.remove('intro-running', 'show-aside-box', 'show-aside-real', 'show-works-stage');
+      home.classList.add('intro-done', 'theme-ready');
+      [
+        'caret-name', 'caret-headline', 'caret-about', 'caret-contact',
+        'caret-bio', 'caret-aside', 'caret-works', 'caret-range'
+      ].forEach(function (id) {
+        hideCaret(document.getElementById(id));
+      });
+      var range = document.getElementById('works-range');
+      if (range) range.classList.remove('is-hidden');
+      var rangeText = document.getElementById('type-range');
+      if (rangeText && !rangeText.textContent) rangeText.textContent = WORKS_RANGE;
+      document.querySelectorAll('.project-card-wrap.rise-wait').forEach(function (el) {
+        el.classList.remove('rise-wait');
+        el.classList.add('rise-in');
+      });
+      var box = document.getElementById('aside-textbox');
+      if (box) box.style.display = 'none';
+      var stage = document.getElementById('aside-stage');
+      if (stage) stage.style.display = 'none';
+      var doodle = document.getElementById('sun-doodle');
+      if (doodle) doodle.classList.add('is-gone');
+      var rule = document.getElementById('hero-rule');
+      if (rule) {
+        rule.classList.add('is-settled');
+        rule.classList.remove('is-primed', 'is-dragging');
+      }
+    }
+
+    function skipToFinal() {
+      var nameEl = document.getElementById('type-name');
+      var headlineEl = document.getElementById('type-headline');
+      var aboutEl = document.getElementById('type-about');
+      var contactEl = document.getElementById('type-contact');
+      var bioEl = document.getElementById('type-bio');
+      var worksEl = document.getElementById('type-works');
+      var rangeEl = document.getElementById('type-range');
+      if (nameEl) nameEl.textContent = NAME_KEEP;
+      if (headlineEl) headlineEl.textContent = HEADLINE;
+      if (aboutEl) aboutEl.textContent = ABOUT;
+      if (contactEl) contactEl.textContent = CONTACT;
+      if (bioEl) setBioFinal(bioEl);
+      if (worksEl) worksEl.textContent = WORKS_FINAL;
+      if (rangeEl) rangeEl.textContent = WORKS_RANGE;
+      finishIntro();
+    }
+
+    async function drawSunDoodle() {
+      var home = document.getElementById('page-home');
+      var doodle = document.getElementById('sun-doodle');
+      if (!doodle) {
+        if (home) home.classList.add('theme-ready');
+        return;
+      }
+      var circle = doodle.querySelector('.sun-circle');
+      var rays = doodle.querySelectorAll('.sun-ray');
+      doodle.classList.remove('is-gone', 'is-dissolving');
+      doodle.classList.add('is-drawing');
+
+      function hideStroke(el) {
+        var len = 0;
+        try { len = el.getTotalLength(); } catch (e) { len = 24; }
+        el.style.transition = 'none';
+        el.style.strokeDasharray = String(len);
+        el.style.strokeDashoffset = String(len);
+      }
+
+      function drawStroke(el, duration) {
+        el.getBoundingClientRect();
+        el.style.transition = 'stroke-dashoffset ' + duration + 'ms ease-out';
+        el.style.strokeDashoffset = '0';
+        return duration;
+      }
+
+      // Hide rays first so only the circle is visible while it draws
+      if (circle) hideStroke(circle);
+      for (var r = 0; r < rays.length; r++) hideStroke(rays[r]);
+      doodle.getBoundingClientRect();
+
+      if (circle) {
+        await wait(drawStroke(circle, 1100) + 40);
+      }
+
+      // Hold on circle alone for half a second, then draw rays
+      await wait(500);
+
+      for (var i = 0; i < rays.length; i++) {
+        await wait(drawStroke(rays[i], 220) + 70);
+      }
+
+      await wait(380);
+      doodle.classList.add('is-dissolving');
+      if (home) home.classList.add('theme-ready');
+      await wait(480);
+      doodle.classList.add('is-gone');
+      doodle.classList.remove('is-drawing', 'is-dissolving');
+    }
+
+    async function drawAsideTextbox() {
+      var home = document.getElementById('page-home');
+      var aside = document.getElementById('hero-aside');
+      var stage = document.getElementById('aside-stage');
+      var cursor = document.getElementById('sheets-cursor');
+      var box = document.getElementById('aside-textbox');
+      var asideEl = document.getElementById('type-aside');
+      var caretAside = document.getElementById('caret-aside');
+      var asideReal = document.getElementById('aside-real');
+      if (!aside || !stage || !cursor || !box || !asideReal) return;
+
+      if (home) home.classList.add('show-aside-box');
+      stage.style.display = '';
+      stage.setAttribute('aria-hidden', 'false');
+
+      var stageRect = stage.getBoundingClientRect();
+      var wrapEl = document.querySelector('#page-home .wrap') || document.querySelector('.wrap');
+      var wrapRect = wrapEl ? wrapEl.getBoundingClientRect() : stageRect;
+      var shopify = asideReal.querySelector('.company-logos a[aria-label="Shopify"]') ||
+        asideReal.querySelector('.company-logos a');
+      var linkedin = asideReal.querySelector('.hero-linkedin');
+      if (!shopify || !linkedin) return;
+
+      var logoRect = shopify.getBoundingClientRect();
+      var linkRect = linkedin.getBoundingClientRect();
+      var logosRow = asideReal.querySelector('.company-logos');
+      var metaRow = asideReal.querySelector('.hero-meta');
+      var contentLeft = logosRow
+        ? logosRow.getBoundingClientRect().left
+        : logoRect.left;
+      var contentTop = logoRect.top;
+      var contentRight = Math.max(linkRect.right, logoRect.right);
+      var contentBottom = metaRow
+        ? metaRow.getBoundingClientRect().bottom
+        : linkRect.bottom;
+
+      // Keep the box snug around logos/meta and inside the page wrap
+      var pad = 10;
+      var handlePad = 6;
+      var minX = Math.max(0, wrapRect.left - stageRect.left + handlePad);
+      var maxX = Math.min(stageRect.width - handlePad, wrapRect.right - stageRect.left - handlePad);
+      var minY = Math.max(0, wrapRect.top - stageRect.top + handlePad);
+      var maxY = stageRect.height - handlePad;
+
+      var startX = Math.max(minX, contentLeft - stageRect.left - pad);
+      var startY = Math.max(minY, contentTop - stageRect.top - pad);
+      var endX = Math.min(maxX, contentRight - stageRect.left + pad);
+      var endY = Math.min(maxY, contentBottom - stageRect.top + pad);
+
+      // Guarantee a readable box without spilling past the wrap
+      if (endX - startX < 160) {
+        startX = Math.max(minX, endX - 160);
+      }
+      if (endY - startY < 64) {
+        startY = Math.max(minY, endY - 64);
+      }
+      var width = Math.max(endX - startX, 1);
+      var height = Math.max(endY - startY, 1);
+
+      // Crosshair arrives at origin
+      cursor.style.transition = 'none';
+      cursor.style.left = startX + 'px';
+      cursor.style.top = startY + 'px';
+      cursor.classList.remove('is-gone', 'is-clicking');
+      cursor.getBoundingClientRect();
+      cursor.classList.add('is-visible');
+      await wait(400);
+
+      // Click + hold to begin drawing
+      cursor.classList.add('is-clicking');
+      await wait(140);
+
+      // Empty box grows with the crosshair (no placeholder — Sheets Drawing default)
+      box.classList.remove(
+        'is-exiting', 'is-typing', 'is-selected', 'is-editing', 'is-drawing'
+      );
+      box.style.left = startX + 'px';
+      box.style.top = startY + 'px';
+      box.style.width = '0px';
+      box.style.height = '0px';
+      if (asideEl) asideEl.textContent = '';
+      hideCaret(caretAside);
+      box.getBoundingClientRect();
+      box.classList.add('is-drawing');
+
+      cursor.style.transition =
+        'left 1.05s cubic-bezier(0.4, 0, 0.2, 1), top 1.05s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, transform 0.2s ease';
+      cursor.style.left = endX + 'px';
+      cursor.style.top = endY + 'px';
+      box.style.width = width + 'px';
+      box.style.height = height + 'px';
+      await wait(1080);
+
+      // Release — object selected with blue border + 8 resize handles
+      cursor.classList.remove('is-clicking');
+      cursor.classList.add('is-gone');
+      box.classList.add('is-selected');
+      await wait(480);
+
+      // Double-click to edit: caret appears, type into the floating text box
+      box.classList.add('is-editing', 'is-typing');
+      showCaret(caretAside);
+      await wait(220);
+      await typeInto(asideEl, caretAside, ASIDE_PROMPT, SPEED.aside);
+      hideCaret(caretAside);
+      if (asideEl) asideEl.textContent = ASIDE_PROMPT;
+      await wait(520);
+
+      box.classList.add('is-exiting');
+      await wait(360);
+      if (home) {
+        home.classList.remove('show-aside-box');
+        home.classList.add('show-aside-real');
+      }
+      asideReal.classList.add('is-revealing');
+      await wait(850);
+      stage.style.display = 'none';
+      stage.setAttribute('aria-hidden', 'true');
+    }
+
+    async function drawHeroRule() {
+      var rule = document.getElementById('hero-rule');
+      if (!rule) return;
+      rule.classList.remove('is-settled', 'is-dragging', 'is-primed');
+      rule.getBoundingClientRect();
+      // Circle appears at the left origin
+      rule.classList.add('is-primed');
+      await wait(320);
+      // Drag the line out to the right; knob rides the leading edge
+      rule.classList.add('is-dragging');
+      await wait(1450);
+      rule.classList.add('is-settled');
+      rule.classList.remove('is-primed', 'is-dragging');
+    }
+
+    async function riseCard(n) {
+      var el = document.querySelector('.project-card-wrap[data-rise="' + n + '"]');
+      if (!el) return;
+      el.classList.remove('rise-wait');
+      el.classList.add('rise-in');
+      await wait(520);
+    }
+
+    async function morphWorksText(worksEl, caretWorks) {
+      // "See my selected works below:" → "Selected works"
+      showCaret(caretWorks);
+      // Delete " below:"
+      await deleteChars(worksEl, ' below:'.length, SPEED.delete);
+      await wait(180);
+      // Delete "See my "
+      var current = worksEl.textContent || '';
+      if (current.indexOf('See my ') === 0) {
+        worksEl.innerHTML = '<span class="type-highlight">See my </span>' + current.slice(7);
+        await wait(380);
+        var prefix = 'See my ';
+        while (prefix.length > 0) {
+          prefix = prefix.slice(0, -1);
+          worksEl.innerHTML =
+            (prefix ? '<span class="type-highlight">' + prefix + '</span>' : '') +
+            'selected works';
+          await wait(SPEED.delete);
+        }
+      }
+      // Capitalize selected → Selected
+      worksEl.textContent = 'selected works';
+      await wait(200);
+      worksEl.innerHTML = '<span class="type-highlight">s</span>elected works';
+      await wait(280);
+      worksEl.textContent = WORKS_FINAL;
+      hideCaret(caretWorks);
+    }
+
+    async function runIntro() {
+      var home = document.getElementById('page-home');
+      var nameEl = document.getElementById('type-name');
+      var headlineEl = document.getElementById('type-headline');
+      var aboutEl = document.getElementById('type-about');
+      var contactEl = document.getElementById('type-contact');
+      var bioEl = document.getElementById('type-bio');
+      var worksEl = document.getElementById('type-works');
+      var caretName = document.getElementById('caret-name');
+      var caretHeadline = document.getElementById('caret-headline');
+      var caretAbout = document.getElementById('caret-about');
+      var caretContact = document.getElementById('caret-contact');
+      var caretBio = document.getElementById('caret-bio');
+      var caretWorks = document.getElementById('caret-works');
+      var worksRange = document.getElementById('works-range');
+
+      if (!nameEl || !headlineEl || !bioEl) {
+        skipToFinal();
+        return;
+      }
+
+      nameEl.textContent = '';
+      showCaret(caretName);
+      await wait(800);
+
+      await typeInto(nameEl, caretName, NAME_FULL, SPEED.name);
+      await wait(480);
+
+      hideCaret(caretName);
+      // Caret jumps to headline at nav size, then grows to headline size
+      showCaret(caretHeadline);
+      caretHeadline.style.transition = 'none';
+      caretHeadline.style.fontSize = '0.82rem';
+      caretHeadline.style.height = '1em';
+      caretHeadline.style.width = '0.08em';
+      caretHeadline.style.minWidth = '2px';
+      caretHeadline.getBoundingClientRect();
+      caretHeadline.style.transition = 'font-size 0.65s cubic-bezier(0.22, 1, 0.36, 1), height 0.65s ease, width 0.65s ease, min-width 0.65s ease';
+      await wait(60);
+      caretHeadline.style.fontSize = '1em';
+      await wait(700);
+      caretHeadline.style.fontSize = '';
+      caretHeadline.style.height = '';
+      caretHeadline.style.width = '';
+      caretHeadline.style.minWidth = '';
+      caretHeadline.style.transition = '';
+
+      var headlinePromise = typeInto(headlineEl, caretHeadline, HEADLINE, SPEED.headline);
+
+      await wait(700);
+      var keepStart = NAME_DELETE.length;
+      var suffix = NAME_FULL.slice(keepStart);
+      nameEl.innerHTML =
+        '<span class="type-highlight">' + NAME_DELETE + '</span>' + suffix;
+      await wait(650);
+
+      var remainingPrefix = NAME_DELETE;
+      while (remainingPrefix.length > 0) {
+        remainingPrefix = remainingPrefix.slice(0, -1);
+        nameEl.innerHTML =
+          (remainingPrefix
+            ? '<span class="type-highlight">' + remainingPrefix + '</span>'
+            : '') + suffix;
+        await wait(SPEED.delete);
+      }
+
+      nameEl.textContent = NAME_KEEP;
+      await wait(120);
+
+      await wait(220);
+      aboutEl.textContent = '';
+      showCaret(caretAbout);
+      await typeInto(aboutEl, caretAbout, ABOUT, SPEED.nav);
+      hideCaret(caretAbout);
+      aboutEl.textContent = ABOUT;
+
+      await wait(180);
+      contactEl.textContent = '';
+      showCaret(caretContact);
+      await typeInto(contactEl, caretContact, CONTACT, SPEED.nav);
+      hideCaret(caretContact);
+      contactEl.textContent = CONTACT;
+
+      await headlinePromise;
+      hideCaret(caretHeadline);
+      headlineEl.textContent = HEADLINE;
+
+      // No pause — bio starts immediately; sun draws in parallel
+      showCaret(caretBio);
+      caretBio.classList.remove('is-large');
+      caretBio.style.fontSize = '';
+      caretBio.style.height = '';
+      caretBio.style.width = '';
+      caretBio.style.minWidth = '';
+      caretBio.style.transition = '';
+
+      var sunPromise = drawSunDoodle();
+
+      await typeInto(bioEl, caretBio, BIO_LEAD, SPEED.bio);
+      var boldNode = document.createElement('strong');
+      boldNode.style.fontWeight = '700';
+      boldNode.textContent = '';
+      bioEl.appendChild(boldNode);
+      await typeIntoNode(boldNode, caretBio, BIO_BOLD, SPEED.bio);
+      hideCaret(caretBio);
+      setBioFinal(bioEl);
+
+      await sunPromise;
+      await wait(280);
+
+      // Google Sheets Drawing-style textbox drag + hero rule in parallel
+      var rulePromise = drawHeroRule();
+      await drawAsideTextbox();
+      await rulePromise;
+      await wait(280);
+
+      // Works prompt + rising cards
+      if (home) home.classList.add('show-works-stage');
+      worksEl.textContent = '';
+      showCaret(caretWorks);
+      await wait(250);
+      await typeInto(worksEl, caretWorks, WORKS_PROMPT, SPEED.works);
+      await wait(400);
+
+      // Rise Signal, then Course Vault — then morph title
+      // Rise Signal, then Course Vault — then morph title while remaining cards keep rising
+      await riseCard(1);
+      await riseCard(2);
+      var morphPromise = morphWorksText(worksEl, caretWorks);
+      await riseCard(3);
+      await riseCard(4);
+      await riseCard(5);
+      await morphPromise;
+
+      // Type the year range after Selected works is cleaned up
+      if (worksRange) worksRange.classList.remove('is-hidden');
+      var rangeEl = document.getElementById('type-range');
+      var caretRange = document.getElementById('caret-range');
+      if (rangeEl) {
+        await wait(220);
+        await typeInto(rangeEl, caretRange, WORKS_RANGE, SPEED.range);
+        hideCaret(caretRange);
+        rangeEl.textContent = WORKS_RANGE;
+      }
+
+      await wait(350);
+      finishIntro();
+    }
+
     function showPage(id) {
       var next = document.getElementById(id);
       if (!next) return;
@@ -1285,6 +2247,12 @@
       });
       next.classList.add('active');
       window.scrollTo(0, 0);
+      if (id === 'page-home') {
+        var home = document.getElementById('page-home');
+        if (home && !home.classList.contains('intro-done')) {
+          skipToFinal();
+        }
+      }
     }
 
     window.showPage = showPage;
@@ -1321,7 +2289,7 @@
         showPage('page-home');
         setTimeout(function () {
           var aboutEl = document.getElementById('about-anchor');
-          if (aboutEl) aboutEl.scrollIntoView({ behavior: 'smooth' });
+          if (aboutEl) aboutEl.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' });
         }, 100);
         return;
       }
@@ -1332,6 +2300,12 @@
       e.preventDefault();
       showPage(id);
     }, true);
+
+    if (reduceMotion) {
+      skipToFinal();
+    } else {
+      runIntro();
+    }
   })();
 </script>
 </body>
